@@ -1,14 +1,14 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { tasksApi, type TaskBody, type TaskFilterValues } from '@/api/tasks';
 import type { Task } from '@/api/types';
 import { qk } from '@/lib/queryKeys';
 
-// keepPreviousData only spans filter changes inside one project; keys never cross projects or orgs.
+// Keep the old rows while a filter change loads, but only within the same project (key is ['project', id, 'tasks', filters]).
 export const useTasks = (projectId: string, filters: TaskFilterValues) =>
   useQuery({
     queryKey: qk.tasks(projectId, filters),
     queryFn: () => tasksApi.list(projectId, filters),
-    placeholderData: keepPreviousData,
+    placeholderData: (prev, prevQuery) => (prevQuery?.queryKey[1] === projectId ? prev : undefined),
   });
 
 function useInvalidateTaskViews(projectId: string, orgId: string) {
