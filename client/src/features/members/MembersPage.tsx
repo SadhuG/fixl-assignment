@@ -21,6 +21,9 @@ const ROLE_OPTIONS: SelectOption<Role>[] = [
   { value: 'ADMIN', label: 'Admin' },
 ];
 
+// Ends a sentence with the name without doubling a period the name already has ("Acme Inc.").
+const withPeriod = (name: string) => (name.endsWith('.') ? name : `${name}.`);
+
 export default function MembersPage() {
   const { org, isAdmin } = useOrg();
   const user = useCurrentUser();
@@ -132,8 +135,8 @@ export default function MembersPage() {
         title={removingSelf ? 'Leave organization?' : 'Remove member?'}
         body={
           removingSelf
-            ? `You will lose access to ${org.name}.`
-            : `${removing?.name ?? ''} will lose access to ${org.name}. Their open tasks become unassigned.`
+            ? `You will lose access to ${withPeriod(org.name)}`
+            : `${removing?.name ?? ''} will lose access to ${withPeriod(org.name)} Their open tasks become unassigned.`
         }
         confirmLabel={removingSelf ? 'Leave' : 'Remove'}
         loading={removeMember.isPending}
