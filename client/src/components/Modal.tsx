@@ -1,6 +1,7 @@
-import { useRef, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { returnFocus } from '@/lib/focusReturn';
 import { cn } from '@/lib/utils';
 
 interface ModalProps {
@@ -19,18 +20,7 @@ export default function Modal({ open, onClose, title, variant = 'center', childr
   const onOpenChange = (next: boolean) => {
     if (!next) onClose();
   };
-  // Radix only restores focus to a DialogTrigger; these modals are controlled, so remember the opener.
-  const openerRef = useRef<HTMLElement | null>(null);
-  const focusProps = {
-    onOpenAutoFocus: () => {
-      openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    },
-    onCloseAutoFocus: (event: Event) => {
-      if (!openerRef.current?.isConnected) return;
-      event.preventDefault();
-      openerRef.current.focus();
-    },
-  };
+  const focusProps = { onCloseAutoFocus: returnFocus };
 
   if (variant === 'center') {
     return (

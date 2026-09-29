@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router';
 import CreateOrgPage from '@/features/orgs/CreateOrgPage';
 import DashboardPage from '@/features/orgs/DashboardPage';
+import ProjectsPage from '@/features/projects/ProjectsPage';
 import LoginPage from '@/features/auth/LoginPage';
 import RegisterPage from '@/features/auth/RegisterPage';
 import GuestOnly from './GuestOnly';
@@ -44,6 +45,7 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <DashboardPage /> },
               // Org child routes are added below this line.
+              { path: 'projects', element: <ProjectsPage /> },
             ],
           },
         ],
