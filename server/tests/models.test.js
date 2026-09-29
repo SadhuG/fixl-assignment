@@ -9,7 +9,9 @@ const oid = () => new mongoose.Types.ObjectId();
 test('user email is trimmed, lowercased and unique', async () => {
   await User.create({ name: 'A', email: '  Mixed@Case.DEV ', passwordHash: 'h' });
   expect(await User.findOne({ email: 'mixed@case.dev' })).not.toBeNull();
-  await expect(User.create({ name: 'B', email: 'mixed@case.dev', passwordHash: 'h' })).rejects.toMatchObject({ code: 11000 });
+  await expect(User.create({ name: 'B', email: 'mixed@case.dev', passwordHash: 'h' })).rejects.toMatchObject({
+    code: 11000,
+  });
 });
 
 test('passwordHash is never selected or serialised by default', async () => {

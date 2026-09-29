@@ -42,7 +42,10 @@ describe('organizations', () => {
     const { agent } = await signUp();
     const empty = await agent.post('/api/organizations').send({ name: '   ' }).expect(400);
     expect(empty.body.error.details[0].field).toBe('name');
-    await agent.post('/api/organizations').send({ name: 'a'.repeat(81) }).expect(400);
+    await agent
+      .post('/api/organizations')
+      .send({ name: 'a'.repeat(81) })
+      .expect(400);
   });
 
   test('GET /organizations/:orgId returns details with my role', async () => {

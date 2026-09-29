@@ -23,7 +23,10 @@ describe('POST /api/auth/register', () => {
   });
 
   test('stores a bcrypt hash, never the plain password', async () => {
-    await request(app).post('/api/auth/register').send({ name: 'D', email: 'd@test.dev', password: 'password123' }).expect(201);
+    await request(app)
+      .post('/api/auth/register')
+      .send({ name: 'D', email: 'd@test.dev', password: 'password123' })
+      .expect(201);
     const stored = await User.findOne({ email: 'd@test.dev' }).select('+passwordHash');
     expect(stored.passwordHash).not.toBe('password123');
     expect(await bcrypt.compare('password123', stored.passwordHash)).toBe(true);
@@ -35,11 +38,17 @@ describe('POST /api/auth/register', () => {
       .post('/api/auth/register')
       .send({ name: 'Again', email: '  Demo@TaskHive.dev ', password: 'password123' })
       .expect(409);
-    expect(res.body.error).toMatchObject({ code: 'EMAIL_TAKEN', details: [{ field: 'email', message: expect.any(String) }] });
+    expect(res.body.error).toMatchObject({
+      code: 'EMAIL_TAKEN',
+      details: [{ field: 'email', message: expect.any(String) }],
+    });
   });
 
   test('rejects a short password with a field error (400)', async () => {
-    const res = await request(app).post('/api/auth/register').send({ name: 'D', email: 'x@test.dev', password: 'short' }).expect(400);
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({ name: 'D', email: 'x@test.dev', password: 'short' })
+      .expect(400);
     expect(res.body.error.details).toEqual([{ field: 'password', message: 'Password must be at least 8 characters' }]);
   });
 });
@@ -47,15 +56,24 @@ describe('POST /api/auth/register', () => {
 describe('POST /api/auth/login', () => {
   test('logs in with mixed-case email and surrounding spaces', async () => {
     await signUp({ email: 'demo@taskhive.dev' });
-    const res = await request(app).post('/api/auth/login').send({ email: ' DEMO@taskhive.dev ', password: 'password123' }).expect(200);
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({ email: ' DEMO@taskhive.dev ', password: 'password123' })
+      .expect(200);
     expect(res.body.email).toBe('demo@taskhive.dev');
     expect(res.headers['set-cookie'][0]).toMatch(/^th_token=/);
   });
 
   test('wrong password and unknown email get the same 401', async () => {
     await signUp({ email: 'demo@taskhive.dev' });
-    const wrong = await request(app).post('/api/auth/login').send({ email: 'demo@taskhive.dev', password: 'nope-nope' }).expect(401);
-    const unknown = await request(app).post('/api/auth/login').send({ email: 'ghost@taskhive.dev', password: 'nope-nope' }).expect(401);
+    const wrong = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'demo@taskhive.dev', password: 'nope-nope' })
+      .expect(401);
+    const unknown = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'ghost@taskhive.dev', password: 'nope-nope' })
+      .expect(401);
     expect(wrong.body).toEqual(unknown.body);
   });
 });
