@@ -11,7 +11,13 @@ async function register({ name, email, password }) {
     throw conflict('EMAIL_TAKEN', 'An account with this email already exists', 'email');
   }
   const passwordHash = await bcrypt.hash(password, env.bcryptCost);
-  return User.create({ name, email, passwordHash });
+  try {
+    return await User.create({ name, email, passwordHash });
+  } catch (err) {
+    // A concurrent register won the race past the pre-check; the unique index catches it.
+    if (err.code === 11000) throw conflict('EMAIL_TAKEN', 'An account with this email already exists', 'email');
+    throw err;
+  }
 }
 
 async function login({ email, password }) {

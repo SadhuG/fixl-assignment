@@ -40,6 +40,17 @@ describe('members', () => {
     expect(dup.body.error.code).toBe('ALREADY_MEMBER');
   });
 
+  test('a duplicate that slips past the pre-check still reports ALREADY_MEMBER (409)', async () => {
+    await addMember(admin.agent, org.id, member.user.email);
+    const exists = jest.spyOn(Membership, 'exists').mockResolvedValueOnce(null);
+    const res = await admin.agent.post(membersUrl()).send({ email: member.user.email }).expect(409);
+    exists.mockRestore();
+    expect(res.body.error).toMatchObject({
+      code: 'ALREADY_MEMBER',
+      details: [{ field: 'email', message: expect.any(String) }],
+    });
+  });
+
   test('members cannot add, change roles or remove (403)', async () => {
     const third = await signUp();
     await addMember(admin.agent, org.id, member.user.email);

@@ -28,11 +28,16 @@ async function addMember(orgId, { email, role }) {
       { field: 'email', message: 'No account uses this email' },
     ]);
   }
-  if (await Membership.exists({ organization: orgId, user: user._id })) {
-    throw conflict('ALREADY_MEMBER', 'This person is already a member', 'email');
+  const alreadyMember = () => conflict('ALREADY_MEMBER', 'This person is already a member', 'email');
+  if (await Membership.exists({ organization: orgId, user: user._id })) throw alreadyMember();
+  try {
+    const membership = await Membership.create({ organization: orgId, user: user._id, role });
+    return toMember(user, membership);
+  } catch (err) {
+    // A concurrent add won the race past the pre-check; the unique index catches it.
+    if (err.code === 11000) throw alreadyMember();
+    throw err;
   }
-  const membership = await Membership.create({ organization: orgId, user: user._id, role });
-  return toMember(user, membership);
 }
 
 async function findMembership(orgId, userId) {

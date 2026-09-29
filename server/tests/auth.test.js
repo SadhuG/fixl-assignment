@@ -44,6 +44,20 @@ describe('POST /api/auth/register', () => {
     });
   });
 
+  test('a duplicate that slips past the pre-check still reports EMAIL_TAKEN (409)', async () => {
+    await signUp({ email: 'race@taskhive.dev' });
+    const exists = jest.spyOn(User, 'exists').mockResolvedValueOnce(null);
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({ name: 'Racer', email: 'race@taskhive.dev', password: 'password123' })
+      .expect(409);
+    exists.mockRestore();
+    expect(res.body.error).toMatchObject({
+      code: 'EMAIL_TAKEN',
+      details: [{ field: 'email', message: expect.any(String) }],
+    });
+  });
+
   test('rejects a short password with a field error (400)', async () => {
     const res = await request(app)
       .post('/api/auth/register')
