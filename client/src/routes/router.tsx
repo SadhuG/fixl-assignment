@@ -1,9 +1,11 @@
 import { createBrowserRouter } from 'react-router';
 import CreateOrgPage from '@/features/orgs/CreateOrgPage';
+import DashboardPage from '@/features/orgs/DashboardPage';
 import LoginPage from '@/features/auth/LoginPage';
 import RegisterPage from '@/features/auth/RegisterPage';
 import GuestOnly from './GuestOnly';
 import NotFoundPage from './NotFoundPage';
+import OrgLayout from './OrgLayout';
 import RequireAuth from './RequireAuth';
 import Root from './Root';
 import RootRedirect from './RootRedirect';
@@ -36,6 +38,14 @@ export const router = createBrowserRouter([
           { path: '/', element: <RootRedirect /> },
           { path: '/orgs/new', element: <CreateOrgPage /> },
           // Org routes are added below this line.
+          {
+            path: '/o/:orgSlug',
+            element: <OrgLayout />,
+            children: [
+              { index: true, element: <DashboardPage /> },
+              // Org child routes are added below this line.
+            ],
+          },
         ],
       },
       { path: '*', element: <NotFoundPage /> },
