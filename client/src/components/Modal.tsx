@@ -47,7 +47,10 @@ export default function Modal({ open, onClose, title, variant = 'center', childr
         aria-describedby={undefined}
         className={cn(
           'gap-0 bg-surface p-0 text-body text-ink',
-          variant === 'right' ? 'w-full sm:max-w-[480px] sm:rounded-l-modal' : 'w-[85%] max-w-xs',
+          // Same data-[side] variants as the shadcn defaults, so these override them instead of losing on specificity.
+          variant === 'right'
+            ? 'data-[side=right]:w-full data-[side=right]:sm:max-w-[480px] data-[side=right]:sm:rounded-l-modal'
+            : 'data-[side=left]:w-[85%] data-[side=left]:max-w-xs data-[side=left]:sm:max-w-xs',
         )}
       >
         <header className={header}>
