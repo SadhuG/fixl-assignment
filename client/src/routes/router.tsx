@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router';
 import CreateOrgPage from '@/features/orgs/CreateOrgPage';
 import DashboardPage from '@/features/orgs/DashboardPage';
+import MembersPage from '@/features/members/MembersPage';
 import ProjectDetailPage from '@/features/projects/ProjectDetailPage';
 import ProjectsPage from '@/features/projects/ProjectsPage';
 import LoginPage from '@/features/auth/LoginPage';
@@ -48,6 +49,7 @@ export const router = createBrowserRouter([
               // Org child routes are added below this line.
               { path: 'projects', element: <ProjectsPage /> },
               { path: 'projects/:projectId', element: <ProjectDetailPage /> },
+              { path: 'members', element: <MembersPage /> },
             ],
           },
         ],
