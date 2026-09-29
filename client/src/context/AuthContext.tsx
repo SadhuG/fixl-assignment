@@ -42,7 +42,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error instanceof ApiError && error.status === 401) {
           setState({ status: 'out', user: null, sessionEnded: false, error: null });
         } else {
-          setState({ status: 'error', user: null, sessionEnded: false, error: error as Error });
+          setState({
+            status: 'error',
+            user: null,
+            sessionEnded: false,
+            error: error instanceof Error ? error : new Error('Something went wrong. Please try again.'),
+          });
         }
       });
     return () => {
