@@ -25,4 +25,9 @@ function grantMembership(userId, orgId, role = 'MEMBER') {
   return Membership.create({ user: userId, organization: orgId, role });
 }
 
-module.exports = { app, request, signUp, createOrg, grantMembership };
+async function addMember(adminAgent, orgId, email, role = 'MEMBER') {
+  const res = await adminAgent.post(`/api/organizations/${orgId}/members`).send({ email, role }).expect(201);
+  return res.body;
+}
+
+module.exports = { app, request, signUp, createOrg, grantMembership, addMember };
