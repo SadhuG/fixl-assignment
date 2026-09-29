@@ -1,0 +1,156 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@import '@fontsource-variable/instrument-sans';
+@import '@fontsource-variable/geist-mono';
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * TaskHive design tokens (docs/plan/01-shell-and-tokens.md).
+ * Naming note: shadcn owns `muted` (subtle background) and `muted-foreground` (secondary text),
+ * so the design's "muted" text colour is `text-muted-foreground` here.
+ */
+@theme {
+  --font-sans: 'Instrument Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, SFMono-Regular, monospace;
+
+  --color-paper: #f4f6f5;
+  --color-surface: #ffffff;
+  --color-sunk: #eef1ef;
+  --color-line: #d9dedb;
+  --color-line-soft: #e7ebe8;
+  --color-ink: #16202a;
+  --color-faint: #8a949a;
+  --color-action: #0e5c52;
+  --color-action-hover: #0a4a42;
+  --color-action-tint: #e2f0ec;
+  --color-danger: #b42318;
+  --color-danger-tint: #fdecea;
+  --color-warn: #a15c07;
+  --color-warn-tint: #fdf3e1;
+  --color-honey: #f2b22e;
+
+  --color-status-todo: #5b6770;
+  --color-status-todo-bg: #edf0ef;
+  --color-status-progress: #1e56b8;
+  --color-status-progress-bg: #e6eefb;
+  --color-status-done: #1f7a4d;
+  --color-status-done-bg: #e3f3ea;
+
+  --color-priority-low: #5b6770;
+  --color-priority-medium: #a15c07;
+  --color-priority-high: #b42318;
+
+  --text-display: 44px;
+  --text-display--line-height: 52px;
+  --text-h1: 26px;
+  --text-h1--line-height: 32px;
+  --text-h2: 18px;
+  --text-h2--line-height: 24px;
+  --text-body: 15px;
+  --text-body--line-height: 22px;
+  --text-small: 14px;
+  --text-small--line-height: 20px;
+  --text-micro: 12.5px;
+  --text-micro--line-height: 18px;
+
+  --radius-badge: 4px;
+  --radius-control: 6px;
+  --radius-card: 8px;
+  --radius-panel: 10px;
+  --radius-modal: 12px;
+}
+
+/* shadcn semantic colours, pointed at the TaskHive tokens. `inline` makes utilities read the variables live. */
+@theme inline {
+  --font-heading: var(--font-sans);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Set per org at runtime by the org layout (hash of the org id → hue). */
+  --color-org: var(--org);
+  --color-org-deep: var(--org-deep);
+  --color-org-tint: var(--org-tint);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+:root {
+  --radius: 6px;
+
+  --background: var(--color-paper);
+  --foreground: var(--color-ink);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-ink);
+  --popover: var(--color-surface);
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-action);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-surface);
+  --secondary-foreground: var(--color-ink);
+  --muted: var(--color-sunk);
+  --muted-foreground: #5b6770;
+  --accent: var(--color-sunk);
+  --accent-foreground: var(--color-ink);
+  --destructive: var(--color-danger);
+  --border: var(--color-line);
+  --input: var(--color-line);
+  --ring: var(--color-action);
+
+  /* Neutral "Slate" hue until an org is active. */
+  --org: #3b4a5c;
+  --org-deep: #2a3542;
+  --org-tint: #e8ecf0;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+  }
+  body {
+    @apply bg-background text-body text-foreground antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-action);
+    outline-offset: 2px;
+  }
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

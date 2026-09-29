@@ -1,0 +1,23 @@
+{
+  "name": "taskhive",
+  "private": true,
+  "description": "TaskHive: a multi-tenant MERN project and task portal",
+  "engines": {
+    "node": ">=22.9"
+  },
+  "scripts": {
+    "setup": "npm install && npm --prefix server install && npm --prefix client install",
+    "dev": "concurrently -k -n api,web -c blue,green \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "build": "npm --prefix client run build",
+    "test": "npm --prefix server test",
+    "typecheck": "npm --prefix client run typecheck",
+    "lint": "npm --prefix server run lint && npm --prefix client run lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5",
+    "prettier": "^3.9.9",
+    "prettier-plugin-tailwindcss": "^0.8.1"
+  }
+}
