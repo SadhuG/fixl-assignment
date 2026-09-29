@@ -19,5 +19,6 @@ router.patch('/:orgId', loadOrg, requireRole('ADMIN'), validate({ body: orgBody 
 // Nested org routes are mounted below this line.
 router.use('/:orgId/members', loadOrg, membersRouter);
 router.use('/:orgId/projects', loadOrg, orgProjectsRouter);
+router.get('/:orgId/stats', loadOrg, orgs.stats);
 
 module.exports = router;

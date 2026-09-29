@@ -1,6 +1,9 @@
 const crypto = require('crypto');
 const Organization = require('../models/Organization');
 const Membership = require('../models/Membership');
+const Project = require('../models/Project');
+const Task = require('../models/Task');
+const { STATUSES } = require('../models/constants');
 const { slugify } = require('../utils/slugify');
 const { conflict } = require('../utils/AppError');
 
@@ -34,4 +37,20 @@ async function listMyOrganizations(userId) {
   return memberships.filter((m) => m.organization).map((m) => ({ ...m.organization.toJSON(), role: m.role }));
 }
 
-module.exports = { createOrganization, listMyOrganizations };
+// orgId must be an ObjectId (req.org._id): aggregate pipelines don't cast strings.
+async function orgStats(orgId, userId) {
+  const [statusCounts, assignedToMe, recentProjects] = await Promise.all([
+    Task.aggregate([{ $match: { organization: orgId } }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
+    Task.find({ organization: orgId, assignee: userId, status: { $ne: 'DONE' } })
+      .sort({ updatedAt: -1 })
+      .limit(10)
+      .populate('project', 'name'),
+    Project.find({ organization: orgId }).sort({ updatedAt: -1 }).limit(5),
+  ]);
+
+  const byStatus = Object.fromEntries(STATUSES.map((s) => [s, 0]));
+  for (const { _id, count } of statusCounts) byStatus[_id] = count;
+  return { byStatus, assignedToMe, recentProjects };
+}
+
+module.exports = { createOrganization, listMyOrganizations, orgStats };

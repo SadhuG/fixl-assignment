@@ -18,4 +18,8 @@ async function rename(req, res) {
   res.json({ ...req.org.toJSON(), role: req.membership.role });
 }
 
-module.exports = { listMine, create, get, rename };
+async function stats(req, res) {
+  res.json(await orgService.orgStats(req.org._id, req.user._id));
+}
+
+module.exports = { listMine, create, get, rename, stats };
