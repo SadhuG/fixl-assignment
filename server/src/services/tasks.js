@@ -3,8 +3,10 @@ const { badRequest } = require('../utils/AppError');
 
 const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+const isMember = (orgId, userId) => Membership.exists({ organization: orgId, user: userId });
+
 async function assertAssignable(orgId, userId) {
-  if (!(await Membership.exists({ organization: orgId, user: userId }))) {
+  if (!(await isMember(orgId, userId))) {
     throw badRequest('The assignee must be a member of this organization', 'assignee', 'INVALID_ASSIGNEE');
   }
 }
@@ -21,4 +23,4 @@ function buildTaskFilter(project, query, userId) {
   return filter;
 }
 
-module.exports = { assertAssignable, buildTaskFilter };
+module.exports = { assertAssignable, isMember, buildTaskFilter };

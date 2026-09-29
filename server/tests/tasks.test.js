@@ -119,4 +119,26 @@ describe('tasks', () => {
     const res = await admin.agent.get(`/api/organizations/${org.id}/projects`).expect(200);
     expect(res.body.data[0].taskCounts).toEqual({ TODO: 1, IN_PROGRESS: 0, DONE: 1 });
   });
+
+  describe('reopening a DONE task', () => {
+    const doneTask = () =>
+      createTask(admin.agent, project.id, { title: 'Shipped', status: 'DONE', assignee: member.user.id });
+
+    test('unassigns a former member', async () => {
+      const task = await doneTask();
+      await admin.agent.delete(`/api/organizations/${org.id}/members/${member.user.id}`).expect(204);
+      const stillDone = await admin.agent.get(listUrl('?status=DONE')).expect(200);
+      expect(stillDone.body.data[0].assignee.id).toBe(member.user.id);
+
+      const res = await admin.agent.patch(`/api/tasks/${task.id}`).send({ status: 'TODO' }).expect(200);
+      expect(res.body).toMatchObject({ status: 'TODO', assignee: null });
+    });
+
+    test('keeps a current member assigned', async () => {
+      const task = await doneTask();
+      const res = await admin.agent.patch(`/api/tasks/${task.id}`).send({ status: 'TODO' }).expect(200);
+      expect(res.body.status).toBe('TODO');
+      expect(res.body.assignee.id).toBe(member.user.id);
+    });
+  });
 });

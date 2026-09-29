@@ -1,5 +1,5 @@
 const Task = require('../models/Task');
-const { assertAssignable, buildTaskFilter } = require('../services/tasks');
+const { assertAssignable, isMember, buildTaskFilter } = require('../services/tasks');
 
 const POPULATE = [
   { path: 'assignee', select: 'name email' },
@@ -29,6 +29,16 @@ async function update(req, res) {
   const body = req.valid.body;
   if (body.assignee) await assertAssignable(req.task.organization, body.assignee);
   req.task.set(body);
+  // Removing a member leaves them on their DONE tasks; reopening one must not keep a non-member assigned.
+  const { task } = req;
+  if (
+    task.status !== 'DONE' &&
+    task.assignee &&
+    !('assignee' in body) &&
+    !(await isMember(task.organization, task.assignee))
+  ) {
+    task.assignee = null;
+  }
   await req.task.save();
   await req.task.populate(POPULATE);
   res.json(req.task);
