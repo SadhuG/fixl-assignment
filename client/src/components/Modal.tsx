@@ -28,7 +28,7 @@ export default function Modal({ open, onClose, title, variant = 'center', childr
         <DialogContent
           {...focusProps}
           aria-describedby={undefined}
-          className="gap-0 rounded-modal bg-surface p-0 text-body text-ink sm:max-w-md [&>[data-slot=dialog-close]]:top-3 [&>[data-slot=dialog-close]]:right-3 [&>[data-slot=dialog-close]]:size-8"
+          className="gap-0 rounded-modal bg-surface p-0 text-body text-ink sm:max-w-md [&>[data-slot=dialog-close]]:top-2 [&>[data-slot=dialog-close]]:right-2 [&>[data-slot=dialog-close]]:size-10"
         >
           <header className={header}>
             <DialogTitle className="text-h2 font-semibold">{title}</DialogTitle>
@@ -46,7 +46,8 @@ export default function Modal({ open, onClose, title, variant = 'center', childr
         side={variant}
         aria-describedby={undefined}
         className={cn(
-          'gap-0 bg-surface p-0 text-body text-ink',
+          // 40 px close button (tap target), centred in the 56 px header.
+          'gap-0 bg-surface p-0 text-body text-ink [&>[data-slot=sheet-close]]:top-2 [&>[data-slot=sheet-close]]:right-2 [&>[data-slot=sheet-close]]:size-10',
           // Same data-[side] variants as the shadcn defaults, so these override them instead of losing on specificity.
           variant === 'right'
             ? 'data-[side=right]:w-full data-[side=right]:sm:max-w-[480px] data-[side=right]:sm:rounded-l-modal'
