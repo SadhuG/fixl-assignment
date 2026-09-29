@@ -53,7 +53,10 @@ interface ErrorBody {
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError<ErrorBody>) => {
-    if (!error.response) {
+    // A gateway error without our error shape comes from a proxy in front of a dead or sleeping API.
+    const gatewayDown =
+      !!error.response && [502, 503, 504].includes(error.response.status) && !error.response.data?.error;
+    if (!error.response || gatewayDown) {
       return Promise.reject(
         new ApiError({
           status: 0,
