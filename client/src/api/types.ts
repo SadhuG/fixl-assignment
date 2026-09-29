@@ -66,6 +66,16 @@ export interface Member {
   joinedAt: string;
 }
 
+export interface AssignedTask extends Omit<Task, 'project'> {
+  project: { id: string; name: string };
+}
+
+export interface OrgStats {
+  byStatus: Record<Status, number>;
+  assignedToMe: AssignedTask[];
+  recentProjects: Project[];
+}
+
 export interface ListResponse<T> {
   data: T[];
 }
