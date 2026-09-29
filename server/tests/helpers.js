@@ -13,4 +13,16 @@ async function signUp(overrides = {}) {
   return { agent, user: res.body };
 }
 
-module.exports = { app, request, signUp };
+const Membership = require('../src/models/Membership');
+
+async function createOrg(agent, name = 'Org') {
+  const res = await agent.post('/api/organizations').send({ name }).expect(201);
+  return res.body;
+}
+
+// Direct DB write for tests that run before the members API exists.
+function grantMembership(userId, orgId, role = 'MEMBER') {
+  return Membership.create({ user: userId, organization: orgId, role });
+}
+
+module.exports = { app, request, signUp, createOrg, grantMembership };
