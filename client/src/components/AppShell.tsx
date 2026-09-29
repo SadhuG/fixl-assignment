@@ -30,7 +30,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-dvh">
       <a
         href="#main"
-        className="sr-only z-50 rounded-control bg-surface px-3 py-2 focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
+        className="sr-only z-50 rounded-control bg-surface px-3 py-2 focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:px-3 focus:py-2"
       >
         Skip to content
       </a>
@@ -57,7 +57,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <aside className="hidden min-h-[calc(100dvh-3.5rem)] shrink-0 border-r border-line bg-surface p-2 md:block md:w-[72px] lg:w-60 lg:p-3">
           <SideNav rail />
         </aside>
-        <main id="main" className="min-w-0 flex-1 p-4 md:p-6 lg:p-8">
+        {/* tabIndex -1 lets the skip link move focus here, not just scroll. */}
+        <main id="main" tabIndex={-1} className="min-w-0 flex-1 p-4 outline-none md:p-6 lg:p-8">
           {children}
         </main>
       </div>
