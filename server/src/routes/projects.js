@@ -5,6 +5,8 @@ const { requireRole, requireAdminOrCreator } = require('../middleware/requireRol
 const { validate } = require('../middleware/validate');
 const { createProjectBody, updateProjectBody } = require('../validators/projects');
 const projects = require('../controllers/projects');
+const { createTaskBody, listTasksQuery } = require('../validators/tasks');
+const tasks = require('../controllers/tasks');
 
 // Collection routes: mounted under /organizations/:orgId/projects after authenticate + loadOrg.
 const orgProjectsRouter = express.Router({ mergeParams: true });
@@ -24,5 +26,7 @@ projectsRouter.patch(
 );
 projectsRouter.delete('/:projectId', loadProject, requireRole('ADMIN'), projects.remove);
 // Task routes nested under a project are added below this line.
+projectsRouter.get('/:projectId/tasks', loadProject, validate({ query: listTasksQuery }), tasks.list);
+projectsRouter.post('/:projectId/tasks', loadProject, validate({ body: createTaskBody }), tasks.create);
 
 module.exports = { orgProjectsRouter, projectsRouter };

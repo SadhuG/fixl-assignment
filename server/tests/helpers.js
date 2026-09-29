@@ -46,4 +46,9 @@ async function twoTenants() {
   return { a, b, orgA, orgB, projectA, projectB };
 }
 
-module.exports = { app, request, signUp, createOrg, grantMembership, addMember, createProject, twoTenants };
+async function createTask(agent, projectId, body = { title: 'Task' }) {
+  const res = await agent.post(`/api/projects/${projectId}/tasks`).send(body).expect(201);
+  return res.body;
+}
+
+module.exports = { app, request, signUp, createOrg, grantMembership, addMember, createProject, twoTenants, createTask };

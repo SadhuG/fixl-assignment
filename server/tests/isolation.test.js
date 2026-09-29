@@ -1,5 +1,6 @@
 const Project = require('../src/models/Project');
-const { app, request, twoTenants } = require('./helpers');
+const Task = require('../src/models/Task');
+const { app, request, twoTenants, createTask } = require('./helpers');
 
 // The attack table from the brief (section 5). User A belongs to Org A only.
 describe('tenant isolation: projects', () => {
@@ -66,5 +67,51 @@ describe('tenant isolation: projects', () => {
     for (const [method, url] of calls) {
       await request(app)[method](url).expect(401);
     }
+  });
+});
+
+describe('tenant isolation: tasks', () => {
+  let w;
+  let taskA;
+  let taskB;
+
+  beforeEach(async () => {
+    w = await twoTenants();
+    taskA = await createTask(w.a.agent, w.projectA.id, { title: 'Task A' });
+    taskB = await createTask(w.b.agent, w.projectB.id, { title: 'Task B' });
+  });
+
+  test('PATCH /api/tasks/:idFromOrgB with a new title → 404, task unchanged', async () => {
+    const res = await w.a.agent.patch(`/api/tasks/${taskB.id}`).send({ title: 'Pwned' }).expect(404);
+    expect(res.body).toEqual({ error: { code: 'NOT_FOUND', message: 'Task not found' } });
+    expect((await Task.findById(taskB.id)).title).toBe('Task B');
+  });
+
+  test('DELETE /api/tasks/:idFromOrgB → 404, task still exists', async () => {
+    await w.a.agent.delete(`/api/tasks/${taskB.id}`).expect(404);
+    expect(await Task.exists({ _id: taskB.id })).not.toBeNull();
+  });
+
+  test('GET and POST /api/projects/:idFromOrgB/tasks → 404, nothing created', async () => {
+    const res = await w.a.agent.get(`/api/projects/${w.projectB.id}/tasks`).expect(404);
+    expect(JSON.stringify(res.body)).not.toContain('Task B');
+    await w.a.agent.post(`/api/projects/${w.projectB.id}/tasks`).send({ title: 'Planted' }).expect(404);
+    expect(await Task.countDocuments({ project: w.projectB.id })).toBe(1);
+  });
+
+  test('PATCH /api/tasks/:idInOrgA with assignee: userOnlyInOrgB → 400', async () => {
+    const res = await w.a.agent.patch(`/api/tasks/${taskA.id}`).send({ assignee: w.b.user.id }).expect(400);
+    expect(res.body.error.code).toBe('INVALID_ASSIGNEE');
+    expect((await Task.findById(taskA.id)).assignee).toBeNull();
+  });
+
+  test('a malformed task id → 404, not 500', async () => {
+    await w.a.agent.patch('/api/tasks/not-an-id').send({ title: 'x' }).expect(404);
+  });
+
+  test('requests without a cookie → 401', async () => {
+    await request(app).get(`/api/projects/${w.projectA.id}/tasks`).expect(401);
+    await request(app).patch(`/api/tasks/${taskA.id}`).send({ title: 'x' }).expect(401);
+    await request(app).delete(`/api/tasks/${taskA.id}`).expect(401);
   });
 });

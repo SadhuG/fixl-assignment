@@ -8,6 +8,7 @@ const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 const authRoutes = require('./routes/auth');
 const organizationRoutes = require('./routes/organizations');
 const { projectsRouter } = require('./routes/projects');
+const taskRoutes = require('./routes/tasks');
 
 function createApp() {
   const app = express();
@@ -24,6 +25,7 @@ function createApp() {
   app.use('/api/auth', authRoutes);
   app.use('/api/organizations', organizationRoutes);
   app.use('/api/projects', projectsRouter);
+  app.use('/api/tasks', taskRoutes);
 
   app.use('/api', notFoundHandler);
   app.use(errorHandler);
