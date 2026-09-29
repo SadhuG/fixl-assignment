@@ -40,6 +40,32 @@ export interface ProjectWithCounts extends Project {
   taskCounts: Record<Status, number>;
 }
 
+export interface Assignee extends UserRef {
+  email: string;
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  description: string;
+  status: Status;
+  priority: Priority;
+  project: string;
+  organization: string;
+  assignee: Assignee | null;
+  createdBy: UserRef | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Member {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  joinedAt: string;
+}
+
 export interface ListResponse<T> {
   data: T[];
 }
