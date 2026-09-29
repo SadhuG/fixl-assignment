@@ -3,12 +3,11 @@ import type { Member, Priority, Status, Task } from '@/api/types';
 import { PriorityBars, StatusGlyph } from '@/components/Badges';
 import InlineSelect from '@/components/InlineSelect';
 import RowMenu from '@/components/RowMenu';
-import { PRIORITIES, PRIORITY_LABEL, STATUSES, STATUS_LABEL } from '@/lib/taskMeta';
+import { PRIORITIES, PRIORITY_LABEL, STATUS_OPTIONS } from '@/lib/taskMeta';
 import { cn } from '@/lib/utils';
 import { assigneeOptions } from './assigneeOptions';
 import { taskActions } from './taskActions';
 
-const statusOptions = STATUSES.map((s) => ({ value: s, label: STATUS_LABEL[s] }));
 const priorityOptions = PRIORITIES.map((p) => ({ value: p, label: PRIORITY_LABEL[p] }));
 
 export type TaskChangeHandler = (changes: Partial<TaskBody>, optimistic?: Partial<Task>) => void;
@@ -53,7 +52,7 @@ export default function TaskRow({ task, members, canDelete, onOpen, onChange, on
           label={`Status of ${task.title}`}
           value={task.status}
           icon={<StatusGlyph status={task.status} />}
-          options={statusOptions}
+          options={STATUS_OPTIONS}
           onChange={(status) => onChange({ status })}
         />
         <InlineSelect<Priority>

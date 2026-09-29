@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link, Navigate, useNavigate, useParams } from 'react-router';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router';
+import { Columns3, LayoutList, Pencil, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { TaskBody, TaskFilterValues } from '@/api/tasks';
 import type { Task } from '@/api/types';
@@ -12,11 +12,18 @@ import { useOrg } from '@/context/OrgContext';
 import { useMembers } from '@/hooks/useMembers';
 import { useDeleteProject, useProject } from '@/hooks/useProjects';
 import { useDeleteTask, useTasks, useUpdateTask } from '@/hooks/useTasks';
+import { cn } from '@/lib/utils';
 import { EMPTY_FILTERS } from '../tasks/filters';
 import TaskDrawer, { type DrawerState } from '../tasks/TaskDrawer';
+import TaskBoard from '../tasks/TaskBoard';
 import TaskFilters from '../tasks/TaskFilters';
 import TaskList from '../tasks/TaskList';
 import ProjectFormModal from './ProjectFormModal';
+
+const VIEWS = [
+  { value: 'list', label: 'List', Icon: LayoutList },
+  { value: 'board', label: 'Board', Icon: Columns3 },
+] as const;
 
 export default function ProjectDetailPage() {
   const { projectId = '' } = useParams();
@@ -34,6 +41,23 @@ export default function ProjectDetailPage() {
   const [deletingTask, setDeletingTask] = useState<Task | null>(null);
   const [editingProject, setEditingProject] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const view = searchParams.get('view') === 'board' ? 'board' : 'list';
+  const [filtersKey, setFiltersKey] = useState(0);
+  const clearFilters = () => {
+    setFilters(EMPTY_FILTERS);
+    setFiltersKey((k) => k + 1); // remounts the search box so its text clears too
+  };
+  const setView = (next: 'list' | 'board') =>
+    setSearchParams(
+      (prev) => {
+        const params = new URLSearchParams(prev);
+        if (next === 'board') params.set('view', 'board');
+        else params.delete('view');
+        return params;
+      },
+      { replace: true },
+    );
 
   const backToProjects = { backTo: `/o/${org.slug}/projects`, backLabel: 'Back to projects' };
 
@@ -80,7 +104,7 @@ export default function ProjectDetailPage() {
       <EmptyState
         title="No tasks match these filters"
         action={
-          <Button variant="secondary" onClick={() => setFilters(EMPTY_FILTERS)}>
+          <Button variant="secondary" onClick={clearFilters}>
             Clear filters
           </Button>
         }
@@ -93,16 +117,14 @@ export default function ProjectDetailPage() {
       />
     );
   } else {
-    tasksBody = (
-      <TaskList
-        tasks={tasksQuery.data}
-        members={members}
-        canDelete={canDeleteTask}
-        onOpen={(task) => setDrawer({ mode: 'edit', task })}
-        onChange={changeTask}
-        onDelete={setDeletingTask}
-      />
-    );
+    const shared = {
+      tasks: tasksQuery.data,
+      canDelete: canDeleteTask,
+      onOpen: (task: Task) => setDrawer({ mode: 'edit', task }),
+      onChange: changeTask,
+      onDelete: setDeletingTask,
+    };
+    tasksBody = view === 'board' ? <TaskBoard {...shared} /> : <TaskList {...shared} members={members} />;
   }
 
   return (
@@ -136,10 +158,32 @@ export default function ProjectDetailPage() {
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <TaskFilters filters={filters} onChange={setFilters} members={members} />
-        <Button onClick={openCreate}>
-          <Plus size={16} aria-hidden="true" /> New task
-        </Button>
+        <TaskFilters key={filtersKey} filters={filters} onChange={setFilters} members={members} />
+        <div className="flex items-center gap-2">
+          <div
+            role="group"
+            aria-label="View"
+            className="inline-flex rounded-control border border-line bg-surface p-0.5"
+          >
+            {VIEWS.map(({ value, label, Icon }) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={view === value}
+                onClick={() => setView(value)}
+                className={cn(
+                  'flex h-9 items-center gap-1.5 rounded-[5px] px-2.5 text-small font-medium sm:h-7',
+                  view === value ? 'bg-org-tint text-org' : 'text-muted-foreground hover:text-ink',
+                )}
+              >
+                <Icon size={14} aria-hidden="true" /> {label}
+              </button>
+            ))}
+          </div>
+          <Button onClick={openCreate}>
+            <Plus size={16} aria-hidden="true" /> New task
+          </Button>
+        </div>
       </div>
 
       {tasksBody}
