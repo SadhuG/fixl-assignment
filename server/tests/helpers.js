@@ -30,4 +30,20 @@ async function addMember(adminAgent, orgId, email, role = 'MEMBER') {
   return res.body;
 }
 
-module.exports = { app, request, signUp, createOrg, grantMembership, addMember };
+async function createProject(agent, orgId, body = { name: 'Project' }) {
+  const res = await agent.post(`/api/organizations/${orgId}/projects`).send(body).expect(201);
+  return res.body;
+}
+
+// User A is only in Org A and User B is only in Org B, each with one project.
+async function twoTenants() {
+  const a = await signUp({ name: 'User A', email: 'a@test.dev' });
+  const b = await signUp({ name: 'User B', email: 'b@test.dev' });
+  const orgA = await createOrg(a.agent, 'Org A');
+  const orgB = await createOrg(b.agent, 'Org B');
+  const projectA = await createProject(a.agent, orgA.id, { name: 'Project A' });
+  const projectB = await createProject(b.agent, orgB.id, { name: 'Project B' });
+  return { a, b, orgA, orgB, projectA, projectB };
+}
+
+module.exports = { app, request, signUp, createOrg, grantMembership, addMember, createProject, twoTenants };

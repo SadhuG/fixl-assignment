@@ -5,6 +5,7 @@ const { requireRole } = require('../middleware/requireRole');
 const { validate } = require('../middleware/validate');
 const { orgBody } = require('../validators/organizations');
 const membersRouter = require('./members');
+const { orgProjectsRouter } = require('./projects');
 const orgs = require('../controllers/organizations');
 
 const router = express.Router();
@@ -17,5 +18,6 @@ router.get('/:orgId', loadOrg, orgs.get);
 router.patch('/:orgId', loadOrg, requireRole('ADMIN'), validate({ body: orgBody }), orgs.rename);
 // Nested org routes are mounted below this line.
 router.use('/:orgId/members', loadOrg, membersRouter);
+router.use('/:orgId/projects', loadOrg, orgProjectsRouter);
 
 module.exports = router;

@@ -7,6 +7,7 @@ const { rejectOperators } = require('./middleware/rejectOperators');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 const authRoutes = require('./routes/auth');
 const organizationRoutes = require('./routes/organizations');
+const { projectsRouter } = require('./routes/projects');
 
 function createApp() {
   const app = express();
@@ -22,6 +23,7 @@ function createApp() {
   // Feature routers are mounted below this line.
   app.use('/api/auth', authRoutes);
   app.use('/api/organizations', organizationRoutes);
+  app.use('/api/projects', projectsRouter);
 
   app.use('/api', notFoundHandler);
   app.use(errorHandler);
