@@ -16,6 +16,7 @@ coverage/
 
 # Local-only folders
 .claude/
+.agent/
 docs/
 *.pdf
 

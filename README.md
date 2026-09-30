@@ -23,7 +23,7 @@ A multi-tenant project and task tracker (MERN). Many organizations share one dep
 
 ## Run it locally
 
-Prerequisites: Node ≥ 22.9 and a MongoDB (Atlas, or `docker run -d -p 27017:27017 mongo:7`).
+Prerequisites: Node ≥ 22.9 and a MongoDB (Atlas, or a local MongoDB Community Server).
 
 ```bash
 git clone <REPO_URL> taskhive && cd taskhive   # replace <REPO_URL> with this repository's clone URL
