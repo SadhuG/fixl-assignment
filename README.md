@@ -69,7 +69,7 @@ Run the tests with `npm test`. They need no database of your own: an in-memory M
 | `NODE_ENV`      | no       | `production`                 | Enables the `Secure` cookie flag and hides error details           |
 | `PORT`          | no       | `4000`                       | HTTP port                                                          |
 | `BCRYPT_COST`   | no       | `12`                         | Password hashing cost                                              |
-| `TRUST_PROXY`   | no       | `1` (prod: `2`)              | Proxy hops before Express, for correct client IPs in rate limiting |
+| `TRUST_PROXY`   | no       | `1` (prod: `3`)              | Proxy hops before Express, for correct client IPs in rate limiting |
 | `SEED_PASSWORD` | no       | `TaskHive#2026`              | Password for seeded demo users                                     |
 
 **client/.env** (see `client/.env.example`): `VITE_API_URL` stays **empty**. The app calls `/api` on its own origin (Vite proxy in dev, Vercel rewrite in prod).
@@ -177,7 +177,24 @@ Membership is its own collection (not an array on User or Organization), so "is 
 
 ## Deployment
 
-Not deployed yet. The intended setup is Vercel for the SPA, with a rewrite that proxies `/api/*` to a Render web service running the Express API, which talks to MongoDB Atlas (M0). Set `NODE_ENV=production`, `TRUST_PROXY=2` (Vercel → Render), and `CLIENT_ORIGIN` to the Vercel origin on the API. Leave `VITE_API_URL` empty on the client. After deploying, run the seed once against Atlas and repeat the deployment-only checks in [VERIFICATION.md](VERIFICATION.md). On Render's free tier the API sleeps when idle, so the first request after a pause can take about 30 seconds.
+Not deployed yet. The intended setup is Vercel for the SPA, with a rewrite that proxies `/api/*` to a Render web service running the Express API, which talks to MongoDB Atlas (M0). Set `NODE_ENV=production`, `TRUST_PROXY=3` (Vercel → Render), and `CLIENT_ORIGIN` to the Vercel origin on the API. Leave `VITE_API_URL` empty on the client. After deploying, run the seed once against Atlas and repeat the deployment-only checks in [VERIFICATION.md](VERIFICATION.md). On Render's free tier the API sleeps when idle, so the first request after a pause can take about 30 seconds.
+
+### Verify production client IPs
+
+In the Render API service's **Environment** settings, set `TRUST_PROXY=3` and save with a deploy. This is a deployment setting; changing `.env.example` does not update Render.
+
+Before testing the login limit, temporarily replace the health handler in `server/src/app.js` with:
+
+```js
+app.get('/api/health', (req, res) => {
+  console.log('health ip=%s ips=%j xff=%s', req.ip, req.ips, req.headers['x-forwarded-for']);
+  res.json({ ok: true });
+});
+```
+
+Deploy the diagnostic, then request `/api/health` repeatedly through the **Vercel URL**. Compare `ip=` in Render's logs with your public IP from `https://api.ipify.org`, using the same network. It must remain your IP across requests. Repeat with a fake `X-Forwarded-For` header and confirm the resolved IP does not change. The hop count depends on the actual proxy chain; do not treat `3` as verified until these checks pass. Remove the diagnostic and redeploy after verification.
+
+Only then, in a fresh rate-limit window, confirm 20 wrong-password attempts return 401 and attempt 21 returns 429. Confirm a second public IP has an independent counter.
 
 ## Trade-offs and decisions
 
