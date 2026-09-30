@@ -28,7 +28,7 @@ export default function RegisterPage() {
     setFormError(null);
     try {
       await registerAccount(values);
-      navigate('/', { replace: true });
+      navigate('/app', { replace: true });
     } catch (err) {
       if (!applyServerErrors(err, setError, ['name', 'email', 'password'])) {
         setFormError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');

@@ -25,7 +25,12 @@ export default function LoginPage() {
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm<LoginValues>({ resolver: zodResolver(loginSchema), defaultValues: { email: '', password: '' } });
+  } = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: params.get('demo') === '1'
+      ? { email: 'demo@taskhive.dev', password: 'TaskHive#2026' }
+      : { email: '', password: '' },
+  });
 
   useEffect(() => {
     if (!locked) return undefined;

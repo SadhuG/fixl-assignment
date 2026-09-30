@@ -52,7 +52,7 @@ export default function MembersPage() {
         setRemoving(null);
         if (target.id === user.id) {
           toast.success(`You left ${org.name}`);
-          navigate('/', { replace: true });
+          navigate('/app', { replace: true });
         } else {
           toast.success(`${target.name} removed`);
         }

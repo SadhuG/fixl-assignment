@@ -13,12 +13,14 @@ import RequireAuth from './RequireAuth';
 import Root from './Root';
 import RootRedirect from './RootRedirect';
 import RouteError from './RouteError';
+import LandingPage from '@/features/landing/LandingPage';
 
 export const router = createBrowserRouter([
   {
     element: <Root />,
     errorElement: <RouteError />,
     children: [
+      { path: '/', element: <LandingPage /> },
       {
         path: '/login',
         element: (
@@ -38,7 +40,7 @@ export const router = createBrowserRouter([
       {
         element: <RequireAuth />,
         children: [
-          { path: '/', element: <RootRedirect /> },
+          { path: '/app', element: <RootRedirect /> },
           { path: '/orgs/new', element: <CreateOrgPage /> },
           // Org routes are added below this line.
           {
