@@ -9,22 +9,22 @@ import OrgSwitcher, { OrgList } from './OrgSwitcher';
 import SideNav from './SideNav';
 
 // Menus, sheets and dialogs render in portals under <body>, so the org hue lives on <html>.
-function useOrgHue(orgId: string) {
+function useOrgHue(orgSlug: string) {
   useLayoutEffect(() => {
     const root = document.documentElement;
-    const vars = orgStyle(orgId);
+    const vars = orgStyle({ slug: orgSlug });
     for (const [name, value] of Object.entries(vars)) root.style.setProperty(name, value);
     return () => {
       for (const name of Object.keys(vars)) root.style.removeProperty(name);
     };
-  }, [orgId]);
+  }, [orgSlug]);
 }
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const { org } = useOrg();
   const [navOpen, setNavOpen] = useState(false);
   const closeNav = () => setNavOpen(false);
-  useOrgHue(org.id);
+  useOrgHue(org.slug);
 
   return (
     <div className="min-h-dvh">

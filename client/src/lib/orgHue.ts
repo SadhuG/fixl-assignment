@@ -1,4 +1,6 @@
-// From docs/ui-plan.md: base / top bar / tint. The hue is a stable hash of the org id.
+import type { Organization } from '@/api/types';
+
+// From docs/ui-plan.md: base / top bar / tint. The slug picks a stable, random-looking palette hue.
 export interface OrgHue {
   name: string;
   base: string;
@@ -16,13 +18,13 @@ const HUES: OrgHue[] = [
   { name: 'Slate', base: '#3B4A5C', deep: '#2A3542', tint: '#E8ECF0' },
 ];
 
-export function hueFor(orgId: string): OrgHue {
+export function hueFor(org: Pick<Organization, 'slug'>): OrgHue {
   let hash = 0;
-  for (const ch of String(orgId)) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  for (const ch of org.slug) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
   return HUES[hash % HUES.length];
 }
 
-export function orgStyle(orgId: string): Record<'--org' | '--org-deep' | '--org-tint', string> {
-  const hue = hueFor(orgId);
+export function orgStyle(org: Pick<Organization, 'slug'>): Record<'--org' | '--org-deep' | '--org-tint', string> {
+  const hue = hueFor(org);
   return { '--org': hue.base, '--org-deep': hue.deep, '--org-tint': hue.tint };
 }

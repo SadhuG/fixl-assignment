@@ -88,7 +88,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* Set per org at runtime by the org layout (hash of the org id → hue). */
+  /* Set per org at runtime by the org layout (hash of the org slug → hue). */
   --color-org: var(--org);
   --color-org-deep: var(--org-deep);
   --color-org-tint: var(--org-tint);
