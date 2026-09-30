@@ -1,5 +1,6 @@
 import { useLayoutEffect, useState, type ReactNode } from 'react';
 import { Menu } from 'lucide-react';
+import { Link } from 'react-router';
 import { useOrg } from '@/context/OrgContext';
 import { orgStyle } from '@/lib/orgHue';
 import AccountMenu, { AccountSummary, LogoutButton } from './AccountMenu';
@@ -43,7 +44,13 @@ export default function AppShell({ children }: { children: ReactNode }) {
         >
           <Menu size={20} aria-hidden="true" />
         </button>
-        <Logo inverted />
+        <Link
+          to={`/o/${org.slug}`}
+          aria-label={`${org.name} dashboard`}
+          className="rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          <Logo inverted />
+        </Link>
         <div className="ml-2 hidden md:block">
           <OrgSwitcher />
         </div>
@@ -63,7 +70,21 @@ export default function AppShell({ children }: { children: ReactNode }) {
         </main>
       </div>
 
-      <Modal open={navOpen} onClose={closeNav} title="Menu" variant="left">
+      <Modal
+        open={navOpen}
+        onClose={closeNav}
+        title={
+          <Link
+            to={`/o/${org.slug}`}
+            onClick={closeNav}
+            aria-label={`${org.name} dashboard`}
+            className="inline-flex rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-org"
+          >
+            <Logo />
+          </Link>
+        }
+        variant="left"
+      >
         <div className="space-y-4">
           <OrgList onNavigate={closeNav} />
           <div className="border-t border-line pt-3">
