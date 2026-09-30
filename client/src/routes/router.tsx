@@ -14,6 +14,7 @@ import Root from './Root';
 import RootRedirect from './RootRedirect';
 import RouteError from './RouteError';
 import LandingPage from '@/features/landing/LandingPage';
+import SubmissionNotesPage from '@/features/submission/SubmissionNotesPage';
 
 export const router = createBrowserRouter([
   {
@@ -21,6 +22,7 @@ export const router = createBrowserRouter([
     errorElement: <RouteError />,
     children: [
       { path: '/', element: <LandingPage /> },
+      { path: '/submission-notes', element: <SubmissionNotesPage /> },
       {
         path: '/login',
         element: (

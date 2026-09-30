@@ -11,6 +11,9 @@ export default defineConfig({
   server: {
     port: 5173,
     // Same-origin /api in dev, mirroring the Vercel rewrite in production.
-    proxy: { '/api': { target: 'http://localhost:4000', changeOrigin: true } },
+    proxy: { '/api': { target: process.env.VITE_DEV_API_PROXY_TARGET || 'http://localhost:4000', changeOrigin: true } },
+  },
+  preview: {
+    proxy: { '/api': { target: process.env.VITE_DEV_API_PROXY_TARGET || 'http://localhost:4000', changeOrigin: true } },
   },
 });

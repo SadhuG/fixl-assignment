@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import type { OrgStats } from '@/api/types';
 import { PriorityBars, RoleBadge, StatusGlyph } from '@/components/Badges';
-import { EmptyState, ErrorState, SkeletonRows } from '@/components/States';
+import { EmptyState, ErrorState } from '@/components/States';
 import { useOrg } from '@/context/OrgContext';
 import { useStats } from '@/hooks/useStats';
 import { formatDate } from '@/lib/format';
@@ -13,7 +13,7 @@ export default function DashboardPage() {
   const statsQuery = useStats(org.id);
 
   let body;
-  if (statsQuery.isPending) body = <SkeletonRows rows={3} label="Loading dashboard" />;
+  if (statsQuery.isPending) body = <DashboardLoading />;
   else if (statsQuery.isError) body = <ErrorState error={statsQuery.error} onRetry={statsQuery.refetch} />;
   else body = <DashboardBody stats={statsQuery.data} orgSlug={org.slug} />;
 
@@ -25,6 +25,46 @@ export default function DashboardPage() {
       </div>
       {body}
       <ActivityFeed key={org.id} orgId={org.id} />
+    </div>
+  );
+}
+
+function DashboardLoading() {
+  return (
+    <div role="status" aria-label="Loading dashboard" className="space-y-8">
+      <section aria-labelledby="status-heading">
+        <h2 id="status-heading" className="text-h2 font-semibold">
+          Tasks by status
+        </h2>
+        <ul className="mt-3 grid gap-3 sm:grid-cols-3">
+          {STATUSES.map((status) => (
+            <li key={status} className="rounded-panel border border-line bg-surface p-4">
+              <p className="flex items-center gap-2 text-small text-muted-foreground">
+                <StatusGlyph status={status} />
+                {STATUS_LABEL[status]}
+              </p>
+              <p className="mt-1 text-display font-semibold" aria-hidden="true">
+                <span className="inline-block w-8 animate-pulse rounded bg-line/60 text-transparent">0</span>
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+      <div className="grid gap-6 lg:grid-cols-2">
+        {['Assigned to me', 'Recent projects'].map((heading) => (
+          <section key={heading} className="space-y-3">
+            <h2 className="text-h2 font-semibold">{heading}</h2>
+            <div className="divide-y divide-line overflow-hidden rounded-panel border border-line bg-surface" aria-hidden="true">
+              {Array.from({ length: 2 }, (_, i) => (
+                <div key={i} className="flex h-[68px] flex-col justify-center gap-2 px-4">
+                  <span className="h-4 w-2/3 animate-pulse rounded bg-line/60" />
+                  <span className="h-3 w-1/3 animate-pulse rounded bg-line/60" />
+                </div>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
     </div>
   );
 }
