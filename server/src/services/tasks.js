@@ -3,10 +3,11 @@ const { badRequest } = require('../utils/AppError');
 
 const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-const isMember = (orgId, userId) => Membership.exists({ organization: orgId, user: userId });
+const isMember = (orgId, userId, session = null) =>
+  Membership.exists({ organization: orgId, user: userId }).session(session);
 
-async function assertAssignable(orgId, userId) {
-  if (!(await isMember(orgId, userId))) {
+async function assertAssignable(orgId, userId, session) {
+  if (!(await isMember(orgId, userId, session))) {
     throw badRequest('The assignee must be a member of this organization', 'assignee', 'INVALID_ASSIGNEE');
   }
 }

@@ -1,6 +1,8 @@
 const Project = require('../models/Project');
 const Task = require('../models/Task');
 const { STATUSES } = require('../models/constants');
+const mongoose = require('mongoose');
+const { notFound } = require('../utils/AppError');
 
 const emptyCounts = () => Object.fromEntries(STATUSES.map((s) => [s, 0]));
 
@@ -23,11 +25,25 @@ async function listProjects(orgId) {
   return projects.map((p) => ({ ...p.toJSON(), taskCounts: byProject.get(String(p._id)) ?? emptyCounts() }));
 }
 
-// No transaction (standalone Mongo in dev/tests): delete tasks first so a partial failure
-// leaves an empty project, never orphaned tasks, and a retry finishes the job.
-async function deleteProject(project) {
-  await Task.deleteMany({ project: project._id, organization: project.organization });
-  await Project.deleteOne({ _id: project._id, organization: project.organization });
+// Task creation and cascade deletion must write the same parent within their
+// transaction, so a request holding an old project cannot insert after deletion.
+function withProjectWrite(project, write) {
+  return mongoose.connection.transaction(async (session) => {
+    const current = await Project.findOneAndUpdate(
+      { _id: project._id, organization: project.organization },
+      { $inc: { __v: 1 } },
+      { session, timestamps: false, returnDocument: 'after' },
+    );
+    if (!current) throw notFound('Project');
+    return write(session);
+  });
 }
 
-module.exports = { listProjects, deleteProject };
+async function deleteProject(project) {
+  return withProjectWrite(project, async (session) => {
+    await Task.deleteMany({ project: project._id, organization: project.organization }, { session });
+    await Project.deleteOne({ _id: project._id, organization: project.organization }, { session });
+  });
+}
+
+module.exports = { listProjects, deleteProject, withProjectWrite };

@@ -23,7 +23,16 @@ A multi-tenant project and task tracker (MERN). Many organizations share one dep
 
 ## Run it locally
 
-Prerequisites: Node ≥ 22.9 and a MongoDB (Atlas, or a local MongoDB Community Server).
+Prerequisites: Node ≥ 22.9 and a transaction-capable MongoDB (Atlas, or a local replica set). Standalone MongoDB is rejected at startup because membership changes and project/task writes use transactions.
+
+For a local database with Docker, start a single-node replica set:
+
+```bash
+docker run -d --name taskhive-mongo -p 27017:27017 mongo:8 --replSet rs0 --bind_ip_all
+docker exec taskhive-mongo mongosh --eval 'rs.initiate({_id:"rs0",members:[{_id:0,host:"localhost:27017"}]})'
+```
+
+Wait for it to elect a primary, then use `mongodb://127.0.0.1:27017/taskhive?replicaSet=rs0` as `MONGODB_URI`. Atlas connection strings can be used directly.
 
 ```bash
 git clone <REPO_URL> taskhive && cd taskhive   # replace <REPO_URL> with this repository's clone URL
@@ -39,14 +48,14 @@ Scripts, from the repo root:
 | Command                                   | What it does                                     |
 | ----------------------------------------- | ------------------------------------------------ |
 | `npm run dev`                             | API and web together                             |
-| `npm test`                                | Server test suite (runs in band)                 |
+| `npm test`                                | Server suite (in band) and client unit tests     |
 | `npm run lint`                            | ESLint (server) and oxlint (client)              |
 | `npm run build`                           | Client typecheck (`tsc -b`) and production build |
 | `npm run typecheck`                       | Client typecheck only                            |
 | `npm run format` / `npm run format:check` | Prettier                                         |
 | `npm --prefix server run seed`            | Seed the demo data                               |
 
-Run the tests with `npm test`. They need no database of your own: an in-memory MongoDB starts automatically, and the first run downloads its `mongod` binary (cached in `~/.cache/mongodb-binaries`).
+Run the tests with `npm test`. They need no database of your own: an in-memory MongoDB replica set starts automatically, and the first run downloads its `mongod` binary (cached in `~/.cache/mongodb-binaries`).
 
 ## Environment variables
 
@@ -175,12 +184,12 @@ Not deployed yet. The intended setup is Vercel for the SPA, with a rewrite that 
 - **Cookie, not localStorage.** The JWT sits in an `httpOnly; SameSite=Lax` cookie (`Secure` in production), so XSS can't read it. The planned Vercel `/api` rewrite makes the API same-origin, which avoids third-party-cookie blocking (Safari) and makes CORS a fallback only.
 - **Stateless JWT with a live membership check.** There's no server-side session store. Logout clears the cookie; a stolen token stays valid until it expires (7 days), but it can never exceed the victim's _current_ memberships.
 - **Add members by existing email** instead of email invites. This keeps scope tight, at the cost of revealing whether an email has an account (to admins only).
-- **Cascade delete without a transaction.** Tasks are deleted before their project, so a partial failure leaves an empty project, never orphaned tasks. Transactions need a replica set, which local and test databases don't have.
-- **Last-admin rule under concurrency.** It's checked before and re-counted after each demotion or removal, and undone if the org would be left without an admin. A concurrent test pins this.
+- **Transactional cascade delete.** Task creation and project deletion both write the parent project within a transaction. Concurrent requests retry against the committed state, preventing orphan tasks; a failed deletion rolls back its task deletion too.
+- **Last-admin rule under concurrency.** Role changes and removals write the same organization document within a transaction before reading memberships and counting admins. This serializes conflicting changes, preserving at least one admin without a temporary demotion/rollback window.
 - **Slugs are unique across all orgs** (`acme`, `acme-2`, …). This reveals that an org _name_ exists but nothing inside it, and slugs stay stable when an org is renamed.
 - **Express 5 without `express-mongo-sanitize`**, which is incompatible with Express 5. Zod type-checks every field, Express 5's query parser doesn't build objects, and a small middleware rejects `$`/`.` keys in bodies.
 - **Board "move" uses a status select, not drag-and-drop.** It's keyboard- and screen-reader-accessible by default.
-- **No frontend unit tests.** Test time went to the security-critical server paths. The UI was verified by hand, and the results are in [VERIFICATION.md](VERIFICATION.md).
+- **Focused frontend unit tests.** Password byte limits, logout success/failure handling and organization colors are tested with Node's test runner. The UI was also verified by hand, and the results are in [VERIFICATION.md](VERIFICATION.md).
 - **Server in JavaScript, client in TypeScript.** A deliberate split: the server stays CommonJS JavaScript, and only the client is typed.
 
 ## Known limitations and future improvements

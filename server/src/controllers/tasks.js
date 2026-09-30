@@ -1,6 +1,7 @@
 const Task = require('../models/Task');
 const { assertAssignable, isMember, buildTaskFilter } = require('../services/tasks');
 const activity = require('../services/activity');
+const { withProjectWrite } = require('../services/projects');
 
 const POPULATE = [
   { path: 'assignee', select: 'name email' },
@@ -15,12 +16,13 @@ async function list(req, res) {
 
 async function create(req, res) {
   const body = req.valid.body;
-  if (body.assignee) await assertAssignable(req.project.organization, body.assignee);
-  const task = await Task.create({
-    ...body,
-    project: req.project._id,
-    organization: req.project.organization,
-    createdBy: req.user._id,
+  const task = await withProjectWrite(req.project, async (session) => {
+    if (body.assignee) await assertAssignable(req.project.organization, body.assignee, session);
+    const [created] = await Task.create(
+      [{ ...body, project: req.project._id, organization: req.project.organization, createdBy: req.user._id }],
+      { session },
+    );
+    return created;
   });
   await task.populate(POPULATE);
   await activity.taskEntry(req, task, 'TASK_CREATED');

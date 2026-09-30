@@ -9,7 +9,7 @@
     "setup": "npm install && npm --prefix server install && npm --prefix client install",
     "dev": "concurrently -k -n api,web -c blue,green \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
     "build": "npm --prefix client run build",
-    "test": "npm --prefix server test",
+    "test": "npm --prefix server test && npm --prefix client test",
     "typecheck": "npm --prefix client run typecheck",
     "lint": "npm --prefix server run lint && npm --prefix client run lint",
     "format": "prettier --write .",

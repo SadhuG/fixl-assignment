@@ -5,6 +5,21 @@ const User = require('../src/models/User');
 const { app, request, signUp } = require('./helpers');
 
 describe('POST /api/auth/register', () => {
+  test('rejects Unicode passwords exceeding 72 UTF-8 bytes', async () => {
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({ name: 'D', email: 'unicode@test.dev', password: '\u00e9'.repeat(36) + 'suffix' })
+      .expect(400);
+    expect(res.body.error.details).toEqual([
+      { field: 'password', message: 'Password must be 72 UTF-8 bytes or fewer' },
+    ]);
+    expect(await User.exists({ email: 'unicode@test.dev' })).toBeNull();
+  });
+
+  test('accepts a Unicode password of exactly 72 UTF-8 bytes', async () => {
+    await signUp({ password: '\u00e9'.repeat(36) });
+  });
+
   test('creates the user, sets an httpOnly cookie and never returns the hash', async () => {
     const res = await request(app)
       .post('/api/auth/register')
@@ -68,6 +83,14 @@ describe('POST /api/auth/register', () => {
 });
 
 describe('POST /api/auth/login', () => {
+  test('rejects an oversized login password instead of accepting a truncated suffix', async () => {
+    const { user } = await signUp({ password: '\u00e9'.repeat(36) });
+    await request(app)
+      .post('/api/auth/login')
+      .send({ email: user.email, password: '\u00e9'.repeat(36) + 'not-the-password' })
+      .expect(400);
+  });
+
   test('logs in with mixed-case email and surrounding spaces', async () => {
     await signUp({ email: 'demo@taskhive.dev' });
     const res = await request(app)

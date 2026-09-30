@@ -1,11 +1,11 @@
 const os = require('os');
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const { MongoMemoryReplSet } = require('mongodb-memory-server');
 
 let mongo;
 
 beforeAll(async () => {
-  mongo = await MongoMemoryServer.create();
+  mongo = await MongoMemoryReplSet.create({ replSet: { count: 1, storageEngine: 'wiredTiger' } });
   // MongoDB driver 7 loads `os` via dynamic import(), which Jest's CommonJS sandbox rejects;
   // the driver then sends an empty handshake and mongod refuses it. Hand it `os` directly.
   await mongoose.connect(mongo.getUri(), { runtimeAdapters: { os } });

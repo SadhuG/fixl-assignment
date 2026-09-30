@@ -8,12 +8,15 @@ const registerBody = z.object({
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters')
-    .max(72, 'Password must be 72 characters or fewer'),
+    .refine((password) => Buffer.byteLength(password, 'utf8') <= 72, 'Password must be 72 UTF-8 bytes or fewer'),
 });
 
 const loginBody = z.object({
   email,
-  password: z.string().min(1, 'Password is required').max(200),
+  password: z
+    .string()
+    .min(1, 'Password is required')
+    .refine((password) => Buffer.byteLength(password, 'utf8') <= 72, 'Password must be 72 UTF-8 bytes or fewer'),
 });
 
 module.exports = { registerBody, loginBody };

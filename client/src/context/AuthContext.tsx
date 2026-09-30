@@ -3,6 +3,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { authApi, type LoginBody, type RegisterBody } from '@/api/auth';
 import { ApiError, setUnauthorizedHandler } from '@/api/client';
 import type { User } from '@/api/types';
+import { toast } from 'sonner';
+import { logoutSession } from '@/lib/logoutSession';
 
 // 'error': the session check itself failed (server unreachable), so we don't know yet whether you're signed in.
 type AuthState =
@@ -83,13 +85,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(async (details: RegisterBody) => signIn(await authApi.register(details)), [signIn]);
 
   const logout = useCallback(async () => {
-    try {
-      await authApi.logout();
-    } finally {
-      queryClient.clear();
-      // Explicit logout must not carry this user's protected page into the next login.
-      setState({ status: 'out', user: null, sessionEnded: false, error: null, loggedOut: true });
-    }
+    await logoutSession(
+      authApi.logout,
+      () => {
+        queryClient.clear();
+        // Explicit logout must not carry this user's protected page into the next login.
+        setState({ status: 'out', user: null, sessionEnded: false, error: null, loggedOut: true });
+      },
+      () => toast.error('Could not log out. Your session is still active. Please try again.'),
+    );
   }, [queryClient]);
 
   const value = useMemo<AuthValue>(
