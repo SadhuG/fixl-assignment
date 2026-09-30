@@ -3,7 +3,7 @@
 ```
 Candidate Name:        Sudhansh
 GitHub Repository:     https://github.com/SadhuG/fixl-assignment
-Deployed Application:  <VERCEL_URL>            (API: https://fixl-assignment.onrender.com)
+Deployed Application:  https://client-rho-ten-81.vercel.app
 Demo Email:            demo@taskhive.dev
 Demo Password:         TaskHive#2026
 ```
@@ -17,6 +17,8 @@ The demo user is **Admin in Acme Inc.** and **Member in Beta Labs**, so one logi
 | `bob@taskhive.dev`   | —         | ADMIN     |
 
 > The API runs on Render's free tier and sleeps when idle. The first request after a pause can take about 30 seconds.
+
+The API is served from the same origin through a Vercel rewrite (`https://client-rho-ten-81.vercel.app/api`); it runs on Render at https://fixl-assignment.onrender.com.
 
 Setup, environment variables, the full API table and the data model are in the [README](../README.md). This file covers the additional notes and how to check every test area the brief names.
 
@@ -50,7 +52,7 @@ Task search and filters (status, priority, assignee, `me`/`none`), a List/Board 
 
 ### Known limitations
 
-- No pagination, email invites, password reset or email verification.
+- No pagination on project and task lists (the activity feed is paginated). No email invites, password reset or email verification.
 - No real-time updates: other users' changes appear on refetch (window focus or navigation).
 - No refresh-token rotation or server-side session revocation.
 - Render free-tier cold starts (~30 s).
@@ -58,19 +60,20 @@ Task search and filters (status, priority, assignee, `me`/`none`), a List/Board 
 
 ### With more time
 
-Cursor pagination on `{organization, createdAt}`, email invitations with expiring tokens, Playwright end-to-end tests of the isolation walkthrough below, OpenAPI docs, and a short-lived access token plus a revocable refresh token.
+Cursor pagination for project and task lists on `{organization, createdAt}`, email invitations with expiring tokens, Playwright end-to-end tests of the isolation walkthrough below, OpenAPI docs, a short-lived access token plus a revocable refresh token, and a fuller UI and UX design pass for a more polished, modern interface.
 
 ---
 
 ## Tests the brief asks for
 
-Section 11 of the brief asks for tests around **authentication, authorization, tenant isolation, organization membership, project access and task access**. Section 5 adds the attack scenario and the list of things an attacker may tamper with, and section 8 the status codes. The table maps each one to its automated tests and to a check you can run yourself.
+Section 11 of the brief asks for tests around **authentication, authorization, tenant isolation, organization membership, project access and task access**. Section 5 adds the attack scenario and the list of things an attacker may tamper with, and section 8 the status codes. Each dropdown below maps one area to its automated tests and to a check you can run yourself.
 
 - **Automated** tests live in `server/tests/` (Jest + Supertest against an in-memory MongoDB replica set).
 - **Script** checks are in [`verify-api.mjs`](verify-api.mjs) and run against any deployment (see [Option 2](#option-2-run-the-attack-script-against-the-live-api)).
 - **UI** checks are the numbered steps in [Option 3](#option-3-check-it-in-the-browser).
 
-### 1. Authentication (brief §4.1, §8)
+<details>
+<summary><strong>1. Authentication (brief §4.1, §8)</strong></summary>
 
 | Requirement                            | Automated test                                                                                                                                        | Check yourself                                                       |
 | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
@@ -81,7 +84,10 @@ Section 11 of the brief asks for tests around **authentication, authorization, t
 | Duplicate email → 409, bad input → 400 | `auth.test.js`: _rejects a duplicate email regardless of case or spaces (409)_; _rejects a short password with a field error (400)_                   | UI: step 1 (register with a seeded email)                            |
 | Token protected in the browser         | `auth.test.js`: _sets an httpOnly cookie_                                                                                                             | Script: _HttpOnly_, _Secure over HTTPS_                              |
 
-### 2. Tenant isolation: the attack scenario (brief §5)
+</details>
+
+<details>
+<summary><strong>2. Tenant isolation: the attack scenario (brief §5)</strong></summary>
 
 > User A belongs to Organization A and requests `GET /api/projects/<project-id-from-Organization-B>`. Organization B's data must not be exposed.
 
@@ -103,7 +109,10 @@ Here User A is **alice** (Acme only) and Organization B is **Beta Labs**. Every 
 | Malformed IDs                   | `/api/projects/not-an-id`                                                            | _a malformed project id → 404, not 500_ (and the task and org equivalents)                                                                                     |
 | Activity feeds                  | `GET /api/tasks/:betaTaskId/activity`                                                | `activity.test.js`: _feed and task history deny foreign tenant access_                                                                                         |
 
-### 3. Authorization and roles (brief §4.3, §5)
+</details>
+
+<details>
+<summary><strong>3. Authorization and roles (brief §4.3, §5)</strong></summary>
 
 | Requirement                           | Automated test                                                                                                                                           | Check yourself                                      |
 | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
@@ -115,7 +124,10 @@ Here User A is **alice** (Acme only) and Organization B is **Beta Labs**. Every 
 | An org always keeps an admin          | `members.test.js`: _the last admin can be neither demoted nor removed (409)_ · `concurrency.test.js`: _concurrent demotions and removal retain an admin_ | UI: step 8                                          |
 | Role changes apply immediately        | `members.test.js`: _removing a member unassigns their open tasks, keeps done ones, and revokes access_                                                   | UI: step 8                                          |
 
-### 4. Organization membership and switching (brief §4.2, §4.4)
+</details>
+
+<details>
+<summary><strong>4. Organization membership and switching (brief §4.2, §4.4)</strong></summary>
 
 | Requirement                                | Automated test                                                                                                          | Check yourself                     |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
@@ -126,7 +138,10 @@ Here User A is **alice** (Acme only) and Organization B is **Beta Labs**. Every 
 | Switching updates projects, tasks, members | `stats.test.js`: _stats cover only the active org and list my open tasks_                                               | UI: steps 2–4                      |
 | Backend validates membership on switch     | Every row in section 2                                                                                                  | UI: step 5                         |
 
-### 5. Project and task access (brief §4.5, §4.6)
+</details>
+
+<details>
+<summary><strong>5. Project and task access (brief §4.5, §4.6)</strong></summary>
 
 | Requirement                                  | Automated test                                                                                                                                                    |
 | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -136,7 +151,10 @@ Here User A is **alice** (Acme only) and Organization B is **Beta Labs**. Every 
 | Task validation                              | `tasks.test.js`: _invalid values and empty updates are rejected (400)_ · `models.test.js`: _task defaults and enums_                                              |
 | Deleting a project can't leave orphan tasks  | `concurrency.test.js`: _a create request holding a deleted project cannot insert an orphan task_; _failed project deletion rolls back its task deletion_          |
 
-### 6. Error handling and status codes (brief §8)
+</details>
+
+<details>
+<summary><strong>6. Error handling and status codes (brief §8)</strong></summary>
 
 | Code | Covered by                                                                                                                         |
 | ---- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -148,6 +166,8 @@ Here User A is **alice** (Acme only) and Organization B is **Beta Labs**. Every 
 | 500  | `errorHandler.test.js`: _unexpected errors become 500 without a stack trace_                                                       |
 
 Also covered: security headers (`app.test.js`: _helmet security headers are set_), and fail-fast config (`env.test.js`: _fails fast listing every missing variable_, _rejects a short JWT secret_).
+
+</details>
 
 ---
 
@@ -177,7 +197,7 @@ npm --prefix server test -- auth members projects tasks organizations
 [`verify-api.mjs`](verify-api.mjs) logs in as the three demo users and runs the 42 checks marked "Script" above against a real deployment. Every check is something the server must refuse, so a passing run changes no data. It needs only Node ≥ 22 (it uses the built-in `fetch`), with no install.
 
 ```bash
-node submission/verify-api.mjs https://fixl-assignment.onrender.com
+node submission/verify-api.mjs https://client-rho-ten-81.vercel.app
 ```
 
 Expected last line: `42 passed, 0 failed` (exit code 0). Any failure prints the status and body it got.
@@ -200,24 +220,3 @@ Open the deployed app. Use a private window, or log out between users.
 8. **Last admin and live roles.** As demo in Acme → Members, change your own role to Member: it's refused with "An organization needs at least one admin. Make someone else an admin first." (409). Now promote alice to Admin. In a second window, log in as alice and open Acme → Members: she has the role controls. Back as demo, demote alice to Member. In alice's still-open window, change a role: the server answers 403 ("Only organization admins can do this") because it reads roles live, and her badge drops back to Member. She never had to log in again.
 9. **Logout protects the app.** Log out, then open `/o/acme-inc` directly: you're sent to the login page.
 10. **Create an organization.** Create a new org from the switcher: you become its Admin, and it's empty. None of Acme's or Beta Labs' data appears.
-
-### Option 4: the example attack with curl
-
-```bash
-API=https://fixl-assignment.onrender.com/api
-
-# alice logs in (Acme only); bob logs in (Beta Labs admin) to find a real Beta Labs project ID
-curl -s -c alice.txt -H 'content-type: application/json' -d '{"email":"alice@taskhive.dev","password":"TaskHive#2026"}' $API/auth/login
-curl -s -c bob.txt   -H 'content-type: application/json' -d '{"email":"bob@taskhive.dev","password":"TaskHive#2026"}'   $API/auth/login
-curl -s -b bob.txt $API/organizations                              # copy Beta Labs' "id"
-curl -s -b bob.txt $API/organizations/<betaOrgId>/projects         # copy Mobile Application's "id"
-
-# the attack: alice asks for Beta Labs' project
-curl -s -w '\n%{http_code}\n' -b alice.txt $API/projects/<betaProjectId>
-# → {"error":{"code":"NOT_FOUND","message":"Project not found"}}  404
-
-# the same body as a project that doesn't exist
-curl -s -w '\n%{http_code}\n' -b alice.txt $API/projects/0123456789abcdef01234567
-```
-
-On Windows, run these in Git Bash or WSL; PowerShell's `curl` is an alias with different flags.

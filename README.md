@@ -2,12 +2,12 @@
 
 A multi-tenant project and task tracker (MERN). Many organizations share one deployment, and **no user can read or change another organization's data**. The server enforces this on every request, independent of the UI.
 
-- **Live app:** _Not deployed yet_ (the intended setup is under [Deployment](#deployment))
-- **API health:** _Not deployed yet_ (`GET /api/health` locally: `http://localhost:4000/api/health`)
-- **Demo login:** `demo@taskhive.dev` / `TaskHive#2026` (Admin in **Acme Inc.**, Member in **Beta Labs**), after running the seed script
+- **Live app:** https://client-rho-ten-81.vercel.app
+- **API health:** https://client-rho-ten-81.vercel.app/api/health (the API itself runs at https://fixl-assignment.onrender.com; the first request after a quiet spell can take ~30 s while Render wakes it)
+- **Demo login:** `demo@taskhive.dev` / `TaskHive#2026` (Admin in **Acme Inc.**, Member in **Beta Labs**). The live app is already seeded; locally, run the seed script
 - Also seeded: `alice@taskhive.dev` (Acme member only) and `bob@taskhive.dev` (Beta Labs admin only), with the same password.
-- **Features:** organizations and members with roles, projects, tasks with status, priority and assignee, task search and filters, and a List/Board view of a project's tasks (`?view=board`).
-- **Verification:** the local accessibility, responsive and failure-mode pass is in [VERIFICATION.md](VERIFICATION.md).
+- **Features:** organizations and members with roles, projects, tasks with status, priority and assignee, task search and filters, a List/Board view of a project's tasks (`?view=board`), dashboard statistics, and an activity log per organization and per task.
+- **Verification:** the local accessibility, responsive and failure-mode pass is in [VERIFICATION.md](VERIFICATION.md). [submission/submission.md](submission/submission.md) maps every test area in the brief to its automated tests, and `node submission/verify-api.mjs <url>` runs the tenant-isolation attacks against any deployment.
 
 **Try the isolation yourself:** log in as demo, open Beta Labs → Mobile Application and copy the URL. Log out, log in as alice, and paste it. You get "Project not found", because the API answered 404.
 
@@ -17,9 +17,9 @@ A multi-tenant project and task tracker (MERN). Many organizations share one dep
 | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | Frontend | React 19, Vite 8, **TypeScript** (strict), React Router 8, TanStack Query 5, React Hook Form + Zod 4, Tailwind CSS 4, shadcn/ui (Radix), axios |
 | Backend  | Node ≥ 22.9, Express 5, Mongoose 9, Zod 4, JWT in an httpOnly cookie, bcryptjs, helmet, express-rate-limit (JavaScript, CommonJS)              |
-| Database | MongoDB (Atlas M0 in the intended deployment)                                                                                                  |
+| Database | MongoDB (Atlas M0 in production)                                                                                                               |
 | Tests    | Jest, Supertest, mongodb-memory-server                                                                                                         |
-| Hosting  | Not deployed yet. Intended: Vercel (SPA + `/api` rewrite) → Render (API) → Atlas                                                               |
+| Hosting  | Vercel (SPA + `/api` rewrite) → Render (API) → MongoDB Atlas                                                                                   |
 
 ## Run it locally
 
@@ -98,6 +98,7 @@ REST over JSON under `/api`. Collections are nested under their parent, and sing
 | GET    | /api/organizations/:orgId                 | member                      | Org details                                                 |
 | PATCH  | /api/organizations/:orgId                 | ADMIN                       | Rename                                                      |
 | GET    | /api/organizations/:orgId/stats           | member                      | Dashboard counts, my open tasks, recent projects            |
+| GET    | /api/organizations/:orgId/activity        | member                      | Org activity feed: `?page=&limit=` (limit ≤ 50)             |
 | GET    | /api/organizations/:orgId/members         | member                      | Members with roles                                          |
 | POST   | /api/organizations/:orgId/members         | ADMIN                       | Add an existing user by email                               |
 | PATCH  | /api/organizations/:orgId/members/:userId | ADMIN                       | Change role                                                 |
@@ -111,6 +112,7 @@ REST over JSON under `/api`. Collections are nested under their parent, and sing
 | POST   | /api/projects/:projectId/tasks            | member                      | Create task                                                 |
 | PATCH  | /api/tasks/:taskId                        | member                      | Update title, description, status, priority, assignee       |
 | DELETE | /api/tasks/:taskId                        | ADMIN or creator            | Delete task                                                 |
+| GET    | /api/tasks/:taskId/activity               | member                      | Task history                                                |
 
 Success returns the resource, or `{ "data": [...] }` for lists. Errors always look like:
 
@@ -133,7 +135,7 @@ Browser ── https://<app>.vercel.app ──┬── static SPA (React)
                                       └── /api/* rewrite ──► Render: Express API ──► MongoDB Atlas
 ```
 
-(That is the intended deployment. Locally, Vite proxies `/api` to Express on :4000.)
+Locally, Vite proxies `/api` to Express on :4000 instead.
 
 **Server** (`server/src`): `routes` → `middleware` (authenticate, tenant loaders, role guards, validation) → thin `controllers` → `services` for business rules (last-admin guard, cascade delete, slug generation, stats). `app.js` builds the app without listening, so tests drive it in memory. A central `errorHandler` maps Zod, Mongoose CastError/ValidationError, duplicate keys and `AppError` to the error shape above and hides internals in production.
 
@@ -177,7 +179,7 @@ Membership is its own collection (not an array on User or Organization), so "is 
 
 ## Deployment
 
-Not deployed yet. The intended setup is Vercel for the SPA, with a rewrite that proxies `/api/*` to a Render web service running the Express API, which talks to MongoDB Atlas (M0). Set `NODE_ENV=production`, `TRUST_PROXY=3` (Vercel → Render), and `CLIENT_ORIGIN` to the Vercel origin on the API. Leave `VITE_API_URL` empty on the client. After deploying, run the seed once against Atlas and repeat the deployment-only checks in [VERIFICATION.md](VERIFICATION.md). On Render's free tier the API sleeps when idle, so the first request after a pause can take about 30 seconds.
+Live at https://client-rho-ten-81.vercel.app. Vercel serves the SPA, with a rewrite (`client/vercel.json`) that proxies `/api/*` to a Render web service running the Express API, which talks to MongoDB Atlas (M0). Set `NODE_ENV=production`, `TRUST_PROXY=3` (Vercel → Render), and `CLIENT_ORIGIN` to the Vercel origin on the API. Leave `VITE_API_URL` empty on the client. The production database has been seeded once with `npm --prefix server run seed`. `node submission/verify-api.mjs https://client-rho-ten-81.vercel.app` passes all 42 checks through the Vercel rewrite, including an `HttpOnly; Secure; SameSite=Lax` session cookie. On Render's free tier the API sleeps when idle, so the first request after a pause can take about 30 seconds.
 
 ### Verify production client IPs
 
@@ -198,7 +200,7 @@ Only then, in a fresh rate-limit window, confirm 20 wrong-password attempts retu
 
 ## Trade-offs and decisions
 
-- **Cookie, not localStorage.** The JWT sits in an `httpOnly; SameSite=Lax` cookie (`Secure` in production), so XSS can't read it. The planned Vercel `/api` rewrite makes the API same-origin, which avoids third-party-cookie blocking (Safari) and makes CORS a fallback only.
+- **Cookie, not localStorage.** The JWT sits in an `httpOnly; SameSite=Lax` cookie (`Secure` in production), so XSS can't read it. The Vercel `/api` rewrite makes the API same-origin, which avoids third-party-cookie blocking (Safari) and makes CORS a fallback only.
 - **Stateless JWT with a live membership check.** There's no server-side session store. Logout clears the cookie; a stolen token stays valid until it expires (7 days), but it can never exceed the victim's _current_ memberships.
 - **Add members by existing email** instead of email invites. This keeps scope tight, at the cost of revealing whether an email has an account (to admins only).
 - **Transactional cascade delete.** Task creation and project deletion both write the parent project within a transaction. Concurrent requests retry against the committed state, preventing orphan tasks; a failed deletion rolls back its task deletion too.
@@ -211,12 +213,12 @@ Only then, in a fresh rate-limit window, confirm 20 wrong-password attempts retu
 
 ## Known limitations and future improvements
 
-- **Deployment-only checks are pending:** the Vercel rewrite, the `Secure` cookie over HTTPS, the Render cold-start and suspend behaviour, and a Safari/VoiceOver pass. See [VERIFICATION.md](VERIFICATION.md).
+- **Deployment checks still pending:** the Render cold-start and suspend behaviour in the UI, the production client-IP check for rate limiting (see [Verify production client IPs](#verify-production-client-ips)), and a Safari/VoiceOver pass. The Vercel rewrite and the `Secure` cookie over HTTPS are verified.
 - **The List/Board toggle is 36 px tall on mobile** (360 px wide), under the 40 px target. It passes WCAG 2.5.8 (24 px).
 - **The task title buttons are about 22 px tall.** They span the full row width, and each row's 40 × 40 Actions menu also has Open.
 - No email invites, password reset, or email verification.
-- No pagination. Lists are fine for small teams; add cursor pagination on `{organization, createdAt}` next.
+- No pagination on project and task lists (only the activity feed pages). They're fine for small teams; add cursor pagination on `{organization, createdAt}` next.
 - No real-time updates; other users' changes appear on refetch (focus/navigation).
 - No refresh-token rotation or server-side session revocation.
-- Render free tier cold starts (~30 s) once deployed.
-- Possible additions: activity log, due dates, per-project permissions, OpenAPI docs, Playwright end-to-end tests.
+- Render free tier cold starts (~30 s) after the API has been idle.
+- Possible additions: due dates, per-project permissions, OpenAPI docs, Playwright end-to-end tests.
