@@ -8,13 +8,14 @@ import type { User } from '@/api/types';
 type AuthState =
   | { status: 'checking'; user: null; sessionEnded: false; error: null }
   | { status: 'error'; user: null; sessionEnded: false; error: Error }
-  | { status: 'out'; user: null; sessionEnded: boolean; error: null }
+  | { status: 'out'; user: null; sessionEnded: boolean; error: null; loggedOut?: true }
   | { status: 'in'; user: User; sessionEnded: false; error: null };
 
 interface AuthValue {
   status: AuthState['status'];
   user: User | null;
   sessionEnded: boolean;
+  loggedOut: boolean;
   error: Error | null;
   retry: () => void;
   login: (credentials: LoginBody) => Promise<User>;
@@ -86,12 +87,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await authApi.logout();
     } finally {
       queryClient.clear();
-      setState({ status: 'out', user: null, sessionEnded: false, error: null });
+      // Explicit logout must not carry this user's protected page into the next login.
+      setState({ status: 'out', user: null, sessionEnded: false, error: null, loggedOut: true });
     }
   }, [queryClient]);
 
   const value = useMemo<AuthValue>(
-    () => ({ ...state, retry, login, register, logout }),
+    () => ({ ...state, loggedOut: state.status === 'out' && state.loggedOut === true, retry, login, register, logout }),
     [state, retry, login, register, logout],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

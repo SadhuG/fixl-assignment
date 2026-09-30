@@ -3,7 +3,7 @@ import { ErrorState, FullPageSpinner } from '@/components/States';
 import { useAuth } from '@/context/AuthContext';
 
 export default function RequireAuth() {
-  const { status, sessionEnded, error, retry } = useAuth();
+  const { status, sessionEnded, loggedOut, error, retry } = useAuth();
   const location = useLocation();
 
   if (status === 'checking') return <FullPageSpinner label="Restoring your session" />;
@@ -17,6 +17,7 @@ export default function RequireAuth() {
     );
   }
   if (status === 'out') {
+    if (loggedOut) return <Navigate to="/login" replace />;
     const next = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/login?next=${next}${sessionEnded ? '&reason=session' : ''}`} replace />;
   }

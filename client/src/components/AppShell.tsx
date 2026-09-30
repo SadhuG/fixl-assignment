@@ -46,7 +46,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         </button>
         <Link
           to={`/o/${org.slug}`}
-          aria-label={`${org.name} dashboard`}
+          aria-label={`TaskHive — ${org.name} dashboard`}
           className="rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           <Logo inverted />
@@ -77,7 +77,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           <Link
             to={`/o/${org.slug}`}
             onClick={closeNav}
-            aria-label={`${org.name} dashboard`}
+            aria-label={`TaskHive — ${org.name} dashboard`}
             className="inline-flex rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-org"
           >
             <Logo />
