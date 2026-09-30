@@ -6,6 +6,50 @@ export const REPO_URL = 'https://github.com/SadhuG/fixl-assignment';
 export const DEMO_EMAIL = 'demo@taskhive.dev';
 export const DEMO_PASSWORD = 'TaskHive#2026';
 
+export const performanceRoutes = [
+  {
+    route: 'Landing',
+    mobile: { performance: 95, accessibility: 95, lcp: '2.35 s' },
+    desktop: { performance: 100, accessibility: 95, lcp: '0.51 s' },
+  },
+  {
+    route: 'Log in',
+    mobile: { performance: 93, accessibility: 100, lcp: '2.57 s' },
+    desktop: { performance: 100, accessibility: 100, lcp: '0.53 s' },
+  },
+  {
+    route: 'Dashboard',
+    mobile: { performance: 91, accessibility: 100, lcp: '2.62 s' },
+    desktop: { performance: 99, accessibility: 100, lcp: '0.55 s' },
+  },
+  {
+    route: 'Projects',
+    mobile: { performance: 94, accessibility: 100, lcp: '2.50 s' },
+    desktop: { performance: 100, accessibility: 100, lcp: '0.52 s' },
+  },
+  {
+    route: 'Project detail',
+    mobile: { performance: 93, accessibility: 100, lcp: '2.61 s' },
+    desktop: { performance: 99, accessibility: 100, lcp: '0.79 s' },
+  },
+  {
+    route: 'Members',
+    mobile: { performance: 94, accessibility: 100, lcp: '2.44 s' },
+    desktop: { performance: 100, accessibility: 100, lcp: '0.51 s' },
+  },
+] as const;
+
+/** p50 of 30 sequential reads per endpoint, through the Vercel rewrite and direct to Render. */
+export const apiLatency = [
+  { endpoint: 'Health check', vercel: 308, render: 293 },
+  { endpoint: 'Current user', vercel: 534, render: 515 },
+  { endpoint: 'My organizations', vercel: 994, render: 982 },
+  { endpoint: 'Dashboard stats', vercel: 1484, render: 1458 },
+  { endpoint: 'Project list', vercel: 1475, render: 1450 },
+  { endpoint: 'Task list', vercel: 1713, render: 1694 },
+  { endpoint: 'Members', vercel: 1477, render: 1456 },
+] as const;
+
 export type OrgRole = 'Admin' | 'Member' | null;
 
 export const people: { name: string; email: string; acme: OrgRole; beta: OrgRole }[] = [

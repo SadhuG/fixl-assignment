@@ -1,0 +1,136 @@
+{
+  "web": "https://client-rho-ten-81.vercel.app",
+  "api": "https://fixl-assignment.onrender.com",
+  "date": "2026-09-30T12:58:45.815Z",
+  "sequential": [
+    {
+      "name": "Health check",
+      "path": "/api/health",
+      "vercel": {
+        "n": 30,
+        "p50": 308,
+        "p95": 767,
+        "max": 834
+      },
+      "render": {
+        "n": 30,
+        "p50": 293,
+        "p95": 350,
+        "max": 908
+      }
+    },
+    {
+      "name": "Current user",
+      "path": "/api/auth/me",
+      "vercel": {
+        "n": 30,
+        "p50": 534,
+        "p95": 1020,
+        "max": 1071
+      },
+      "render": {
+        "n": 30,
+        "p50": 515,
+        "p95": 535,
+        "max": 538
+      }
+    },
+    {
+      "name": "My organizations",
+      "path": "/api/organizations",
+      "vercel": {
+        "n": 30,
+        "p50": 994,
+        "p95": 1105,
+        "max": 1147
+      },
+      "render": {
+        "n": 30,
+        "p50": 982,
+        "p95": 1020,
+        "max": 1021
+      }
+    },
+    {
+      "name": "Dashboard stats",
+      "path": "/api/organizations/:orgId/stats",
+      "vercel": {
+        "n": 30,
+        "p50": 1484,
+        "p95": 1966,
+        "max": 2740
+      },
+      "render": {
+        "n": 30,
+        "p50": 1458,
+        "p95": 1489,
+        "max": 2024
+      }
+    },
+    {
+      "name": "Project list",
+      "path": "/api/organizations/:orgId/projects",
+      "vercel": {
+        "n": 30,
+        "p50": 1475,
+        "p95": 1648,
+        "max": 1961
+      },
+      "render": {
+        "n": 30,
+        "p50": 1450,
+        "p95": 1540,
+        "max": 1984
+      }
+    },
+    {
+      "name": "Task list",
+      "path": "/api/projects/:projectId/tasks",
+      "vercel": {
+        "n": 30,
+        "p50": 1713,
+        "p95": 1764,
+        "max": 1806
+      },
+      "render": {
+        "n": 30,
+        "p50": 1694,
+        "p95": 1726,
+        "max": 2236
+      }
+    },
+    {
+      "name": "Members",
+      "path": "/api/organizations/:orgId/members",
+      "vercel": {
+        "n": 30,
+        "p50": 1477,
+        "p95": 1959,
+        "max": 1980
+      },
+      "render": {
+        "n": 30,
+        "p50": 1456,
+        "p95": 1491,
+        "max": 1543
+      }
+    }
+  ],
+  "login": {
+    "n": 3,
+    "p50": 2895,
+    "p95": 5061,
+    "max": 5061
+  },
+  "concurrency": {
+    "clients": 10,
+    "requests": 200,
+    "errors": 0,
+    "seconds": 40.5,
+    "requestsPerSecond": 4.9,
+    "n": 200,
+    "p50": 1736,
+    "p95": 2391,
+    "max": 4821
+  }
+}
