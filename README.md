@@ -8,6 +8,7 @@ A multi-tenant project and task tracker (MERN). Many organizations share one dep
 - Also seeded: `alice@taskhive.dev` (Acme member only) and `bob@taskhive.dev` (Beta Labs admin only), with the same password.
 - **Features:** organizations and members with roles, projects, tasks with status, priority and assignee, task search and filters, a List/Board view of a project's tasks (`?view=board`), dashboard statistics, and an activity log per organization and per task.
 - **Verification:** the local accessibility, responsive and failure-mode pass is in [VERIFICATION.md](VERIFICATION.md). [submission/submission.md](submission/submission.md) maps every test area in the brief to its automated tests, and `node submission/verify-api.mjs <url>` runs the tenant-isolation attacks against any deployment.
+- **Submission notes page:** https://client-rho-ten-81.vercel.app/submission-notes (public, also linked from the landing page) presents the same notes in the app: the request pipeline stopping a cross-tenant request with 404, the demo accounts, deployment and data model diagrams, the tested areas, and how to check the work in the browser, with the attack script or with the test suite.
 
 **Try the isolation yourself:** log in as demo, open Beta Labs → Mobile Application and copy the URL. Log out, log in as alice, and paste it. You get "Project not found", because the API answered 404.
 
