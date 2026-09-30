@@ -12,7 +12,10 @@ export function useAddMember(orgId: string) {
     mutationFn: (body: MemberAddBody) => membersApi.add(orgId, body),
     // 404 (no such account) and 409 (already a member) belong on the email field, not in a toast.
     meta: { inlineErrors: true },
-    onSuccess: () => qc.invalidateQueries({ queryKey: qk.members(orgId) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.members(orgId) });
+      qc.invalidateQueries({ queryKey: qk.activityOf(orgId) });
+    },
   });
 }
 
@@ -23,6 +26,7 @@ export function useChangeRole(orgId: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.members(orgId) });
       qc.invalidateQueries({ queryKey: qk.orgs }); // my own role may have changed
+      qc.invalidateQueries({ queryKey: qk.activityOf(orgId) });
     },
   });
 }
@@ -36,6 +40,7 @@ export function useRemoveMember(orgId: string) {
       qc.invalidateQueries({ queryKey: qk.orgs });
       qc.invalidateQueries({ queryKey: qk.stats(orgId) });
       qc.invalidateQueries({ queryKey: ['project'] }); // their open tasks were unassigned
+      qc.invalidateQueries({ queryKey: qk.activityOf(orgId) });
     },
   });
 }

@@ -7,6 +7,7 @@ const description = z.string().trim().max(5000, 'Description must be 5,000 chara
 const status = z.enum(STATUSES);
 const priority = z.enum(PRIORITIES);
 const assignee = objectId.nullable();
+const dueDate = z.iso.date().nullable();
 
 const createTaskBody = z.object({
   title,
@@ -14,6 +15,7 @@ const createTaskBody = z.object({
   status: status.optional(),
   priority: priority.optional(),
   assignee: assignee.optional(),
+  dueDate: dueDate.optional(),
 });
 
 // No defaults on update: omitted fields stay as they are.
@@ -24,6 +26,7 @@ const updateTaskBody = z
     status: status.optional(),
     priority: priority.optional(),
     assignee: assignee.optional(),
+    dueDate: dueDate.optional(),
   })
   .refine((body) => Object.keys(body).length > 0, { message: 'Provide at least one field to update' });
 

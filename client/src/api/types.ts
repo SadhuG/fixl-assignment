@@ -50,12 +50,40 @@ export interface Task {
   description: string;
   status: Status;
   priority: Priority;
+  dueDate: string | null;
   project: string;
   organization: string;
   assignee: Assignee | null;
   createdBy: UserRef | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ActivityChange {
+  field: string;
+  from: string | null;
+  to: string | null;
+}
+
+export interface ActivityEntry {
+  id: string;
+  organization: string;
+  project: string | null;
+  task: string | null;
+  actor: string;
+  actorName: string;
+  projectName: string | null;
+  taskTitle: string | null;
+  memberName: string | null;
+  action: string;
+  changes: ActivityChange[];
+  createdAt: string;
+}
+
+export interface ActivityPage extends ListResponse<ActivityEntry> {
+  page: number;
+  limit: number;
+  total: number;
 }
 
 export interface Member {

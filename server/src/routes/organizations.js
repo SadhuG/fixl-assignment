@@ -7,6 +7,7 @@ const { orgBody } = require('../validators/organizations');
 const membersRouter = require('./members');
 const { orgProjectsRouter } = require('./projects');
 const orgs = require('../controllers/organizations');
+const activity = require('../services/activity');
 
 const router = express.Router();
 router.use(authenticate);
@@ -20,5 +21,6 @@ router.patch('/:orgId', loadOrg, requireRole('ADMIN'), validate({ body: orgBody 
 router.use('/:orgId/members', loadOrg, membersRouter);
 router.use('/:orgId/projects', loadOrg, orgProjectsRouter);
 router.get('/:orgId/stats', loadOrg, orgs.stats);
+router.get('/:orgId/activity', loadOrg, activity.listOrg);
 
 module.exports = router;

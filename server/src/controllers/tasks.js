@@ -1,5 +1,6 @@
 const Task = require('../models/Task');
 const { assertAssignable, isMember, buildTaskFilter } = require('../services/tasks');
+const activity = require('../services/activity');
 
 const POPULATE = [
   { path: 'assignee', select: 'name email' },
@@ -22,11 +23,13 @@ async function create(req, res) {
     createdBy: req.user._id,
   });
   await task.populate(POPULATE);
+  await activity.taskEntry(req, task, 'TASK_CREATED');
   res.status(201).json(task);
 }
 
 async function update(req, res) {
   const body = req.valid.body;
+  const before = req.task.toObject();
   if (body.assignee) await assertAssignable(req.task.organization, body.assignee);
   req.task.set(body);
   // Removing a member leaves them on their DONE tasks; reopening one must not keep a non-member assigned.
@@ -40,12 +43,15 @@ async function update(req, res) {
     task.assignee = null;
   }
   await req.task.save();
+  const changes = activity.changedFields(before, req.task, ['title', 'status', 'priority', 'assignee', 'dueDate']);
+  if (changes.length) await activity.taskEntry(req, req.task, 'TASK_UPDATED', changes);
   await req.task.populate(POPULATE);
   res.json(req.task);
 }
 
 async function remove(req, res) {
   await Task.deleteOne({ _id: req.task._id, organization: req.task.organization });
+  await activity.taskEntry(req, req.task, 'TASK_DELETED');
   res.status(204).end();
 }
 

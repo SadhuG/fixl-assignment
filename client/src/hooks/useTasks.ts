@@ -17,6 +17,8 @@ function useInvalidateTaskViews(projectId: string, orgId: string) {
     qc.invalidateQueries({ queryKey: qk.tasksOf(projectId) });
     qc.invalidateQueries({ queryKey: qk.projects(orgId) });
     qc.invalidateQueries({ queryKey: qk.stats(orgId) });
+    qc.invalidateQueries({ queryKey: qk.activityOf(orgId) });
+    qc.invalidateQueries({ queryKey: ['org', orgId, 'task'] });
   };
 }
 

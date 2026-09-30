@@ -16,9 +16,11 @@ import { useCreateTask, useDeleteTask, useUpdateTask } from '@/hooks/useTasks';
 import { applyServerErrors } from '@/lib/formErrors';
 import { PRIORITIES, PRIORITY_LABEL, STATUSES, STATUS_LABEL } from '@/lib/taskMeta';
 import { assigneeOptions } from './assigneeOptions';
+import ActivityList from '@/features/activity/ActivityList';
+import { useTaskActivity } from '@/hooks/useActivity';
 import { taskSchema, type TaskValues } from './schemas';
 
-const FIELDS = ['title', 'description', 'status', 'priority', 'assignee'] as const;
+const FIELDS = ['title', 'description', 'status', 'priority', 'assignee', 'dueDate'] as const;
 
 export type DrawerState = { mode: 'create' } | { mode: 'edit'; task: Task } | null;
 
@@ -53,6 +55,7 @@ function TaskForm({ task, projectId, members, onDone }: TaskFormProps) {
   const createTask = useCreateTask(projectId, org.id);
   const updateTask = useUpdateTask(projectId, org.id);
   const deleteTask = useDeleteTask(projectId, org.id);
+  const history = useTaskActivity(org.id, task?.id ?? '');
   const [formError, setFormError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
   const reasonId = useId();
@@ -69,6 +72,7 @@ function TaskForm({ task, projectId, members, onDone }: TaskFormProps) {
       status: task?.status ?? 'TODO',
       priority: task?.priority ?? 'MEDIUM',
       assignee: task?.assignee?.id ?? '',
+      dueDate: task?.dueDate?.slice(0, 10) ?? '',
     },
   });
 
@@ -76,7 +80,7 @@ function TaskForm({ task, projectId, members, onDone }: TaskFormProps) {
 
   async function onSubmit(values: TaskValues) {
     setFormError(null);
-    const body: TaskBody = { ...values, assignee: values.assignee || null };
+    const body: TaskBody = { ...values, assignee: values.assignee || null, dueDate: values.dueDate || null };
     try {
       if (task) {
         // Send only what changed: an untouched former-member assignee would otherwise fail validation.
@@ -144,6 +148,7 @@ function TaskForm({ task, projectId, members, onDone }: TaskFormProps) {
             </option>
           ))}
         </TextField>
+        <TextField label="Due date" type="date" error={errors.dueDate?.message} {...register('dueDate')} />
         <div className="flex justify-end gap-2">
           <Button variant="secondary" onClick={onDone}>
             Cancel
@@ -153,6 +158,13 @@ function TaskForm({ task, projectId, members, onDone }: TaskFormProps) {
           </Button>
         </div>
       </form>
+
+      {task && (
+        <section className="mt-8 border-t border-line pt-4" aria-label="Task history">
+          <h3 className="font-semibold">History</h3>
+          <ActivityList query={history} empty="No history for this task yet." />
+        </section>
+      )}
 
       {task && (
         <div className="mt-8 border-t border-line pt-4">

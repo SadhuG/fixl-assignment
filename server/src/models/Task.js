@@ -8,6 +8,7 @@ const taskSchema = new Schema(
     description: { type: String, trim: true, maxlength: 5000, default: '' },
     status: { type: String, enum: STATUSES, default: 'TODO' },
     priority: { type: String, enum: PRIORITIES, default: 'MEDIUM' },
+    dueDate: { type: Date, default: null },
     project: { type: Schema.Types.ObjectId, ref: 'Project', required: true },
     // Denormalised from the project: one indexed tenant filter per query and a second line of defence.
     organization: { type: Schema.Types.ObjectId, ref: 'Organization', required: true },

@@ -17,6 +17,7 @@ export function useSaveProject(orgId: string) {
       qc.setQueryData(qk.project(project.id), project);
       qc.invalidateQueries({ queryKey: qk.projects(orgId) });
       qc.invalidateQueries({ queryKey: qk.stats(orgId) });
+      qc.invalidateQueries({ queryKey: qk.activityOf(orgId) });
     },
   });
 }
@@ -29,6 +30,7 @@ export function useDeleteProject(orgId: string) {
       qc.removeQueries({ queryKey: qk.project(projectId) });
       qc.invalidateQueries({ queryKey: qk.projects(orgId) });
       qc.invalidateQueries({ queryKey: qk.stats(orgId) });
+      qc.invalidateQueries({ queryKey: qk.activityOf(orgId) });
     },
   });
 }

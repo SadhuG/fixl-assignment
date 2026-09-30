@@ -13,6 +13,7 @@ export interface TaskBody {
   status: Status;
   priority: Priority;
   assignee: string | null;
+  dueDate: string | null;
 }
 
 const cleanParams = (filters: object) =>

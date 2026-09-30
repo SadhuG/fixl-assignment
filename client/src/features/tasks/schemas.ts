@@ -7,5 +7,6 @@ export const taskSchema = z.object({
   status: z.enum(STATUSES),
   priority: z.enum(PRIORITIES),
   assignee: z.string(),
+  dueDate: z.string(),
 });
 export type TaskValues = z.infer<typeof taskSchema>;

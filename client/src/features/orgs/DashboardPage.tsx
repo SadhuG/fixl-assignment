@@ -6,6 +6,7 @@ import { useOrg } from '@/context/OrgContext';
 import { useStats } from '@/hooks/useStats';
 import { formatDate } from '@/lib/format';
 import { PRIORITY_LABEL, STATUSES, STATUS_LABEL } from '@/lib/taskMeta';
+import ActivityFeed from '@/features/activity/ActivityFeed';
 
 export default function DashboardPage() {
   const { org } = useOrg();
@@ -23,6 +24,7 @@ export default function DashboardPage() {
         <RoleBadge role={org.role} />
       </div>
       {body}
+      <ActivityFeed key={org.id} orgId={org.id} />
     </div>
   );
 }
