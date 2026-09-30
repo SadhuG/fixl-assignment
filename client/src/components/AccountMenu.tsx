@@ -55,12 +55,12 @@ export default function AccountMenu() {
           <span className="sr-only">Account menu</span>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 rounded-panel border border-line bg-surface p-2 shadow-lg">
-        <DropdownMenuLabel className="p-0 font-normal">
+      <DropdownMenuContent align="end" className="w-64">
+        <DropdownMenuLabel className="p-0 text-body font-normal">
           <AccountSummary />
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => logout()} className="min-h-10 gap-2 px-2 text-body text-ink">
+        <DropdownMenuItem onSelect={() => logout()}>
           <LogOut size={16} aria-hidden="true" /> Log out
         </DropdownMenuItem>
       </DropdownMenuContent>

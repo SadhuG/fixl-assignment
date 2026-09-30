@@ -1,10 +1,14 @@
-import { useEffect, useState, type ChangeEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
 import type { TaskFilterValues } from '@/api/tasks';
-import type { Member } from '@/api/types';
+import type { Member, Status } from '@/api/types';
+import InlineSelect, { type SelectOption } from '@/components/InlineSelect';
 import { STATUSES, STATUS_LABEL } from '@/lib/taskMeta';
 
-const selectClass = 'h-10 rounded-control border border-line bg-surface px-2 text-small sm:h-8';
+const STATUS_FILTER_OPTIONS: SelectOption<Status | ''>[] = [
+  { value: '', label: 'All statuses' },
+  ...STATUSES.map((s) => ({ value: s, label: STATUS_LABEL[s] })),
+];
 
 interface SearchBoxProps {
   initial: string;
@@ -45,36 +49,28 @@ interface TaskFiltersProps {
 }
 
 export default function TaskFilters({ filters, onChange, members }: TaskFiltersProps) {
-  const set = (key: 'status' | 'assignee') => (event: ChangeEvent<HTMLSelectElement>) =>
-    onChange({ ...filters, [key]: event.target.value });
   const q = filters.q ?? '';
   return (
     <div className="flex flex-wrap gap-2">
       <SearchBox initial={q} onSearch={(next) => next !== q && onChange({ ...filters, q: next })} />
-      <label>
-        <span className="sr-only">Filter by status</span>
-        <select value={filters.status} onChange={set('status')} className={selectClass}>
-          <option value="">All statuses</option>
-          {STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {STATUS_LABEL[s]}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label>
-        <span className="sr-only">Filter by assignee</span>
-        <select value={filters.assignee} onChange={set('assignee')} className={selectClass}>
-          <option value="">Anyone</option>
-          <option value="me">Assigned to me</option>
-          <option value="none">Unassigned</option>
-          {members.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.name}
-            </option>
-          ))}
-        </select>
-      </label>
+      <InlineSelect<Status | ''>
+        label="Filter by status"
+        value={filters.status}
+        options={STATUS_FILTER_OPTIONS}
+        onChange={(status) => onChange({ ...filters, status })}
+      />
+      <InlineSelect
+        label="Filter by assignee"
+        value={filters.assignee}
+        options={[
+          { value: '', label: 'Anyone' },
+          { value: 'me', label: 'Assigned to me' },
+          { value: 'none', label: 'Unassigned' },
+          ...members.map((m) => ({ value: m.id, label: m.name })),
+        ]}
+        onChange={(assignee) => onChange({ ...filters, assignee })}
+        className="max-w-[13rem]"
+      />
     </div>
   );
 }

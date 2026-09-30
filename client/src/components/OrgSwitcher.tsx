@@ -29,7 +29,7 @@ export function OrgList({ onNavigate }: { onNavigate?: () => void }) {
               to={`/o/${o.slug}${section}`}
               onClick={onNavigate}
               aria-current={o.id === active.id ? 'page' : undefined}
-              className="flex min-h-10 items-center gap-3 rounded-control px-2 py-1.5 text-ink hover:bg-paper"
+              className="flex min-h-10 items-center gap-3 rounded-control px-2 py-1.5 text-ink hover:bg-sunk"
             >
               <OrgMark org={o} size={24} />
               <span className="flex-1 truncate">{o.name}</span>
@@ -39,11 +39,11 @@ export function OrgList({ onNavigate }: { onNavigate?: () => void }) {
           </li>
         ))}
       </ul>
-      <div className="mt-1 border-t border-line pt-1">
+      <div className="mt-1 border-t border-line-soft pt-1">
         <Link
           to="/orgs/new"
           onClick={onNavigate}
-          className="flex min-h-10 items-center gap-3 rounded-control px-2 py-1.5 font-medium text-action hover:bg-paper"
+          className="flex min-h-10 items-center gap-3 rounded-control px-2 py-1.5 font-medium text-action hover:bg-sunk"
         >
           <Plus size={16} aria-hidden="true" /> Create organization
         </Link>
@@ -71,10 +71,7 @@ export default function OrgSwitcher() {
           <span className="sr-only">Switch organization</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent
-        align="start"
-        className="w-72 rounded-panel border border-line bg-surface p-2 text-body shadow-lg"
-      >
+      <PopoverContent align="start" className="w-72 gap-0 p-1 text-body">
         <OrgList onNavigate={() => setOpen(false)} />
       </PopoverContent>
     </Popover>

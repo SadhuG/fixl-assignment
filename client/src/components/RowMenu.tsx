@@ -4,10 +4,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { setFocusReturnTarget } from '@/lib/focusReturn';
-import { cn } from '@/lib/utils';
 
 export interface RowMenuItem {
   label: string;
@@ -47,13 +47,15 @@ export default function RowMenu({ label, items }: RowMenuProps) {
           <MoreHorizontal size={18} aria-hidden="true" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-60 rounded-panel border border-line bg-surface p-1 shadow-lg">
-        {items.map((item) => (
+      <DropdownMenuContent align="end" className="w-60">
+        {items.map((item, index) => (
           <div key={item.label}>
+            {/* Destructive actions sit apart from the safe ones. */}
+            {item.tone === 'danger' && index > 0 && items[index - 1].tone !== 'danger' && <DropdownMenuSeparator />}
             <DropdownMenuItem
               disabled={item.disabled}
+              variant={item.tone === 'danger' ? 'destructive' : 'default'}
               onSelect={() => select(item)}
-              className={cn('min-h-10 gap-2 px-2 text-small', item.tone === 'danger' ? 'text-danger' : 'text-ink')}
             >
               {item.icon}
               {item.label}
