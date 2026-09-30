@@ -149,6 +149,41 @@
 }
 
 /*
+ * Horizontal scroll inside a bordered panel (the submission notes score table on narrow screens). The bar sits
+ * in a paper strip under a hairline, like one more table row, with the thumb kept clear of the rounded corners.
+ * Chromium and Safari use the -webkit- pseudo-elements; setting `scrollbar-color` would make Chromium ignore them,
+ * so only Firefox gets the standard properties.
+ */
+@layer components {
+  .scroll-x-panel::-webkit-scrollbar {
+    height: 13px;
+    border-top: 1px solid var(--color-line-soft);
+    background: var(--color-paper);
+  }
+  .scroll-x-panel::-webkit-scrollbar-track {
+    margin-inline: 12px;
+    background: transparent;
+  }
+  .scroll-x-panel::-webkit-scrollbar-thumb {
+    border: 3.5px solid transparent;
+    border-radius: 999px;
+    background: var(--color-faint) padding-box;
+  }
+  .scroll-x-panel::-webkit-scrollbar-thumb:hover {
+    background-color: var(--muted-foreground);
+  }
+  .scroll-x-panel::-webkit-scrollbar-thumb:active {
+    background-color: var(--color-action);
+  }
+  @supports not selector(::-webkit-scrollbar) {
+    .scroll-x-panel {
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-faint) var(--color-paper);
+    }
+  }
+}
+
+/*
  * Customizable <select> (Chromium): the open list matches the dropdown menus while keeping native keyboard,
  * screen-reader and mobile-picker behaviour. Other browsers keep their native picker. Unlayered so it beats
  * the `appearance-none` utility on the controls; each control draws its own chevron, so the picker icon is hidden.

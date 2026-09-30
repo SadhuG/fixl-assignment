@@ -4,8 +4,8 @@
 // Signed-in pages are measured as demo@taskhive.dev.
 //
 //   node submission/perf/lighthouse.mjs https://client-rho-ten-81.vercel.app
-//   PAGE=Dashboard PRESET=mobile LIGHTHOUSE_OUTPUT=dashboard-mobile-after.json \
-//     node submission/perf/lighthouse.mjs http://127.0.0.1:4173
+//   PAGE=Dashboard PRESET=mobile RUNS=3 LIGHTHOUSE_OUTPUT=dashboard-mobile-after.json \
+//     node submission/perf/lighthouse.mjs https://client-rho-ten-81.vercel.app
 //
 // Writes submission/perf/results/lighthouse.json. Needs Chrome installed; downloads Lighthouse via npx.
 

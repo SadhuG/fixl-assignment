@@ -19,7 +19,7 @@ export const performanceRoutes = [
   },
   {
     route: 'Dashboard',
-    mobile: { performance: 91, accessibility: 100, lcp: '2.62 s' },
+    mobile: { performance: 95, accessibility: 100, lcp: '2.43 s' },
     desktop: { performance: 99, accessibility: 100, lcp: '0.55 s' },
   },
   {

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Replace only the dashboard mobile baseline with its targeted rerun.
+// Replace only the dashboard mobile baseline with its targeted rerun on the live deployment.
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const resultsDir = new URL('./results/', import.meta.url);
@@ -17,7 +17,7 @@ const results = baseline.results.map((result) => {
   if (result.page !== replacement.page || result.preset !== replacement.preset) return result;
   if (result.path !== replacement.path) throw new Error('Dashboard paths differ');
   replaced += 1;
-  return { ...replacement, source: 'local production build with live API proxy' };
+  return { ...replacement, source: 'live deployment rerun after the layout fix' };
 });
 if (replaced !== 1) throw new Error(`Expected one baseline dashboard mobile result, found ${replaced}`);
 

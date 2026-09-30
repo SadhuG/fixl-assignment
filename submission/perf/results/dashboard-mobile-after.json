@@ -1,24 +1,24 @@
 {
-  "base": "http://127.0.0.1:4173",
+  "base": "https://client-rho-ten-81.vercel.app",
   "lighthouse": "13",
-  "date": "2026-09-30T14:16:57.137Z",
+  "date": "2026-09-30T14:44:17.003Z",
   "results": [
     {
       "page": "Dashboard",
       "path": "/o/acme-inc",
       "preset": "mobile",
-      "runs": 1,
-      "finalUrl": "http://127.0.0.1:4173/o/acme-inc",
-      "performance": 91,
+      "runs": 3,
+      "finalUrl": "https://client-rho-ten-81.vercel.app/o/acme-inc",
+      "performance": 95,
       "accessibility": 100,
       "bestPractices": 100,
       "seo": 91,
-      "fcpMs": 2467,
-      "lcpMs": 2623,
-      "tbtMs": 169,
+      "fcpMs": 2280,
+      "lcpMs": 2430,
+      "tbtMs": 7,
       "cls": 0,
-      "speedIndexMs": 3039,
-      "transferKb": 298
+      "speedIndexMs": 3028,
+      "transferKb": 303
     }
   ]
 }

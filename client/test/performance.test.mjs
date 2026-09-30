@@ -41,6 +41,7 @@ test('submission route scores match the merged Lighthouse results', () => {
 
   const dashboard = merged.results.find((row) => row.page === 'Dashboard' && row.preset === 'mobile');
   assert.equal(dashboard.cls, 0);
-  assert.equal(dashboard.performance, 91);
-  assert.equal(dashboard.source, 'local production build with live API proxy');
+  assert.equal(dashboard.performance, 95);
+  assert.equal(dashboard.finalUrl, 'https://client-rho-ten-81.vercel.app/o/acme-inc');
+  assert.equal(dashboard.source, 'live deployment rerun after the layout fix');
 });

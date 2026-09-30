@@ -26,17 +26,17 @@ Setup, environment variables, the full API table and the data model are in the [
 
 ## Production performance test
 
-The original audit ran on **30 September 2026** against `https://client-rho-ten-81.vercel.app`. It covers all six primary routes (Landing, Log in, Dashboard, Projects, Project detail and Members) in Lighthouse 13's default simulated-mobile profile and desktop preset. The dashboard mobile profile was rerun after the layout fix using a local production build with `/api` proxied to the live deployment. The results below merge that rerun with the other 11 original results. The same session also measured seven API read paths through both the Vercel rewrite and Render, three logins, and 200 task-list requests from 10 parallel clients.
+The audit ran on **30 September 2026** against `https://client-rho-ten-81.vercel.app`. It covers all six primary routes (Landing, Log in, Dashboard, Projects, Project detail and Members) in Lighthouse 13's default simulated-mobile profile and desktop preset. After a layout fix, the dashboard mobile profile was rerun on the live deployment (median of three runs), and that rerun replaces its first result below. The same session also measured seven API read paths through both the Vercel rewrite and Render, three logins, and 200 task-list requests from 10 parallel clients.
 
 ### Headline results
 
 | Measure                                                 |                                Result |
 | ------------------------------------------------------- | ------------------------------------: |
-| Lighthouse mobile performance, average across 6 routes  |                  **93** (range 91–95) |
+| Lighthouse mobile performance, average across 6 routes  |                  **94** (range 93–95) |
 | Lighthouse desktop performance, average across 6 routes |        **100** rounded (range 99–100) |
 | Lighthouse accessibility, average across all 12 audits  |                 **99** (range 95–100) |
-| Mobile LCP, average / worst                             |                   **2.52 s / 2.62 s** |
-| Total Blocking Time across all 12 audits                |                          **0–169 ms** |
+| Mobile LCP, average / worst                             |                   **2.48 s / 2.61 s** |
+| Total Blocking Time across all 12 audits                |                           **0–14 ms** |
 | Transferred payload per route                           |                        **281–305 KB** |
 | Concurrent task-list reads                              | **200**, **0 errors**, 4.9 requests/s |
 | Concurrent latency                                      |        p50 **1.74 s**, p95 **2.39 s** |
@@ -45,19 +45,21 @@ The original audit ran on **30 September 2026** against `https://client-rho-ten-
 | -------------- | -----------------: | -------------------: | ------------------: | --------------------: | ---------: | ----------: |
 | Landing        |                 95 |                   95 |                 100 |                    95 |     2.35 s |      0.51 s |
 | Log in         |                 93 |                  100 |                 100 |                   100 |     2.57 s |      0.53 s |
-| Dashboard¹     |                 91 |                  100 |                  99 |                   100 |     2.62 s |      0.55 s |
+| Dashboard¹     |                 95 |                  100 |                  99 |                   100 |     2.43 s |      0.55 s |
 | Projects       |                 94 |                  100 |                 100 |                   100 |     2.50 s |      0.52 s |
 | Project detail |                 93 |                  100 |                  99 |                   100 |     2.61 s |      0.79 s |
 | Members        |                 94 |                  100 |                 100 |                   100 |     2.44 s |      0.51 s |
 
-¹ Dashboard mobile is the local production-build rerun, with the live API. Its loading view now reserves the status cards and task sections, and CLS measured **0**, down from **0.169** in the production baseline. The other 11 table entries are from the original live deployment audit.
+¹ Dashboard mobile is the live rerun after the layout fix. Its loading view now reserves the status cards and task sections, so CLS measured **0**, down from **0.169** in the first audit, and performance rose from 88 to **95**.
 
 The accessibility average is **99 across all 12 audits**. Every authenticated route scored 100 in both profiles; the public Landing route scored 95. The larger performance constraint is the hosted API/database path: Vercel p50 read latency ranged from **308 ms** for health to **1,713 ms** for the task list. Direct Render timings were close, so the Vercel rewrite adds little relative to the database-backed work. Login measured p50 **2,895 ms** (bcrypt cost 12 contributes intentionally).
 
-These figures are dated measurements, not an SLA. Network location, Render load and MongoDB Atlas conditions affect them. The [merged result](perf/results/lighthouse-merged.json), [original production baseline](perf/results/lighthouse.json), [dashboard mobile rerun](perf/results/dashboard-mobile-after.json), and repeatable harnesses are in [`perf/`](perf/):
+These figures are dated measurements, not an SLA. Network location, Render load and MongoDB Atlas conditions affect them. The [merged result](perf/results/lighthouse-merged.json), [first audit](perf/results/lighthouse.json), [dashboard mobile rerun](perf/results/dashboard-mobile-after.json), and repeatable harnesses are in [`perf/`](perf/):
 
 ```bash
 node submission/perf/lighthouse.mjs https://client-rho-ten-81.vercel.app
+PAGE=Dashboard PRESET=mobile RUNS=3 LIGHTHOUSE_OUTPUT=dashboard-mobile-after.json \
+  node submission/perf/lighthouse.mjs https://client-rho-ten-81.vercel.app
 node submission/perf/merge-lighthouse.mjs
 node submission/perf/api-latency.mjs https://client-rho-ten-81.vercel.app https://fixl-assignment.onrender.com
 ```

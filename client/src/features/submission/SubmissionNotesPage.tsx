@@ -299,7 +299,7 @@ function Tests() {
     '103 server tests pass (Jest + Supertest)',
     '7 client tests pass (node:test)',
     '42 live checks pass against the deployed app',
-    '12 Lighthouse results: 11 deployed audits and one local dashboard rerun',
+    '12 Lighthouse audits of the deployed app',
   ];
   return (
     <section aria-labelledby="tests" className={cn(container, sectionPad, 'flex flex-col gap-14')}>
@@ -333,10 +333,10 @@ const formatMs = (ms: number) => `${ms.toLocaleString('en-US')} ms`;
 
 function ScoreLedger() {
   const figures = [
-    ['93', 'Mobile performance', 'Six routes, 91 to 95'],
+    ['94', 'Mobile performance', 'Six routes, 93 to 95'],
     ['100', 'Desktop performance', 'Six routes, 99 to 100'],
     ['99', 'Accessibility', 'All 12 audits, 95 to 100'],
-    ['2.52 s', 'Mobile LCP', 'Slowest route 2.62 s'],
+    ['2.48 s', 'Mobile LCP', 'Slowest route 2.61 s'],
   ] as const;
   return (
     <dl className="grid grid-cols-2 self-start border-t border-[#8b9695]">
@@ -372,8 +372,13 @@ function RouteScores() {
   const groupStart = 'border-l border-line-soft';
   const columns = ['Performance', 'Accessibility', 'LCP'];
   return (
-    <div className="overflow-x-auto rounded-panel border border-line bg-surface">
-      <table className="w-full min-w-[640px] border-collapse text-right text-small tabular-nums">
+    <div
+      role="region"
+      aria-label="Scores by route"
+      tabIndex={0}
+      className="scroll-x-panel overflow-x-auto rounded-panel border border-line bg-surface"
+    >
+      <table className="w-full min-w-[640px] border-collapse text-right text-small whitespace-nowrap tabular-nums">
         <caption className="sr-only">Lighthouse scores and largest contentful paint by route and profile</caption>
         <thead className="bg-[#f7f9f8]">
           <tr>
@@ -401,9 +406,6 @@ function RouteScores() {
             <tr key={route} className="h-12 border-t border-line-soft">
               <th scope="row" className="sticky left-0 bg-surface px-5 text-left font-medium whitespace-nowrap">
                 {route}
-                {route === 'Dashboard' && (
-                  <span className="block text-micro font-normal text-muted-foreground">Mobile: local rerun</span>
-                )}
               </th>
               <td className="px-4 font-semibold">{score(mobile.performance)}</td>
               <td className="px-4 font-semibold">{mobile.accessibility}</td>
@@ -483,9 +485,8 @@ function Performance() {
     <section aria-labelledby="performance" className={cn(container, sectionPad, 'flex flex-col gap-14')}>
       <div className="grid gap-10 lg:grid-cols-[380px_1fr] lg:gap-20">
         <SectionHeading id="performance" title="Fast in the browser. Database-bound at the API.">
-          Lighthouse audited every primary route of the live deployment on 30 September 2026. The dashboard mobile
-          result is a later rerun against the local production build with the live API. The API timings are from the
-          same day.
+          Lighthouse audited every primary route of the live deployment on 30 September 2026. The API timings are from
+          the same day.
         </SectionHeading>
         <ScoreLedger />
       </div>
@@ -493,11 +494,6 @@ function Performance() {
       <div className="flex flex-col gap-5">
         <h3 className="text-[26px] leading-8 font-semibold tracking-[-0.03em]">Scores by route</h3>
         <RouteScores />
-        <p className="rounded-card border-l-[3px] border-honey bg-paper px-4.5 py-3.5 text-body leading-[23px]">
-          The dashboard mobile result replaces its production baseline in the table above: CLS fell from 0.169 to 0
-          after its loading view began reserving the status cards and task sections. Performance measured 91 and
-          accessibility 100. The other 11 results remain from the original production audit.
-        </p>
       </div>
 
       <div className="grid gap-10 lg:grid-cols-[380px_1fr] lg:gap-20">
@@ -522,9 +518,9 @@ function Performance() {
       </div>
 
       <p className="max-w-[760px] text-micro leading-5 text-muted-foreground">
-        Lighthouse 13, one run per route and profile, default simulated mobile profile and desktop preset. Dashboard
-        mobile was rerun locally after the fix. API timings were measured from one machine, so network and hosting
-        conditions apply. Raw results and scripts are in{' '}
+        Lighthouse 13, default simulated mobile profile and desktop preset, one run per route and profile. Dashboard
+        mobile is the median of three runs, taken after a layout fix removed its loading shift. API timings were
+        measured from one machine, so network and hosting conditions apply. Raw results and scripts are in{' '}
         <a
           href={`${REPO_URL}/tree/main/submission/perf`}
           target="_blank"
